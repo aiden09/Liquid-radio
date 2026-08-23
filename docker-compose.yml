@@ -1,0 +1,21 @@
+services:
+  liquid-radio:
+    build: .
+    image: liquid-radio:latest
+    container_name: liquid-radio
+    ports:
+      - "${PORT:-8080}:8080"
+    volumes:
+      # Положите аудиофайлы в ./music на хосте
+      - ./music:/app/music:ro
+    environment:
+      TZ: UTC
+      PORT: "8080"
+      MUSIC_DIR: /app/music
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

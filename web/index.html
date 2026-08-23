@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="aurora">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liquid Glass Radio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="aurora"] {
+      --bg: #050510; --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
+      --glass-highlight: rgba(255,255,255,0.18); --text: #f0f4ff; --text-dim: rgba(240,244,255,0.55);
+      --accent: #7dd3fc; --accent2: #c084fc; --accent3: #67e8f9;
+      --orb1: linear-gradient(135deg,#7c3aed,#2563eb); --orb2: linear-gradient(135deg,#06b6d4,#8b5cf6);
+      --orb3: linear-gradient(135deg,#ec4899,#6366f1); --bg-grad1: #1a0a2e; --bg-grad2: #0a1a2e; --bg-grad3: #0f0a1a;
+      --radius: 28px; --shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    [data-theme="ocean"] {
+      --bg: #020c14; --glass: rgba(180,230,255,0.06); --glass-border: rgba(150,220,255,0.14);
+      --glass-highlight: rgba(200,240,255,0.2); --text: #e8f7ff; --text-dim: rgba(200,230,255,0.55);
+      --accent: #38bdf8; --accent2: #22d3ee; --accent3: #67e8f9;
+      --orb1: linear-gradient(135deg,#0ea5e9,#0369a1); --orb2: linear-gradient(135deg,#06b6d4,#0891b2);
+      --orb3: linear-gradient(135deg,#2dd4bf,#0284c7); --bg-grad1: #0a1f2e; --bg-grad2: #061820; --bg-grad3: #030f18;
+    }
+    [data-theme="sunset"] {
+      --bg: #12080a; --glass: rgba(255,220,200,0.07); --glass-border: rgba(255,180,140,0.15);
+      --glass-highlight: rgba(255,210,180,0.22); --text: #fff5f0; --text-dim: rgba(255,220,200,0.55);
+      --accent: #fb923c; --accent2: #f472b6; --accent3: #fdba74;
+      --orb1: linear-gradient(135deg,#f97316,#db2777); --orb2: linear-gradient(135deg,#fb7185,#c026d3);
+      --orb3: linear-gradient(135deg,#fbbf24,#ea580c); --bg-grad1: #2a0f14; --bg-grad2: #1a0a10; --bg-grad3: #12080c;
+    }
+    [data-theme="emerald"] {
+      --bg: #040f0c; --glass: rgba(180,255,220,0.06); --glass-border: rgba(140,240,200,0.14);
+      --glass-highlight: rgba(180,255,220,0.2); --text: #ecfdf5; --text-dim: rgba(180,240,210,0.55);
+      --accent: #34d399; --accent2: #2dd4bf; --accent3: #6ee7b7;
+      --orb1: linear-gradient(135deg,#10b981,#059669); --orb2: linear-gradient(135deg,#14b8a6,#0d9488);
+      --orb3: linear-gradient(135deg,#22c55e,#047857); --bg-grad1: #0a1f18; --bg-grad2: #061510; --bg-grad3: #040f0c;
+    }
+    [data-theme="amethyst"] {
+      --bg: #0c0614; --glass: rgba(230,200,255,0.06); --glass-border: rgba(200,160,255,0.14);
+      --glass-highlight: rgba(230,200,255,0.2); --text: #f5f0ff; --text-dim: rgba(220,200,255,0.55);
+      --accent: #c084fc; --accent2: #a78bfa; --accent3: #e879f9;
+      --orb1: linear-gradient(135deg,#a855f7,#7c3aed); --orb2: linear-gradient(135deg,#c026d3,#9333ea);
+      --orb3: linear-gradient(135deg,#8b5cf6,#6d28d9); --bg-grad1: #1a0a2e; --bg-grad2: #12081e; --bg-grad3: #0c0614;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
+      transition: background 0.6s ease, color 0.4s ease;
+    }
+    .bg {
+      transition: filter 0.08s linear, transform 0.08s linear, opacity 0.08s linear;
+      position: fixed; inset: 0; z-index: 0; overflow: hidden;
+      background: radial-gradient(ellipse at 20% 20%, var(--bg-grad1) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 80%, var(--bg-grad2) 0%, transparent 50%),
+                  radial-gradient(ellipse at 50% 50%, var(--bg-grad3) 0%, var(--bg) 70%);
+      transition: background 0.8s ease;
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55;
+      animation: float 18s ease-in-out infinite; will-change: transform;
+      transition: background 0.8s ease, opacity 0.5s;
+    }
+    .orb1 { width: 55vw; height: 55vw; background: var(--orb1); top: -15%; left: -10%; }
+    .orb2 { width: 45vw; height: 45vw; background: var(--orb2); bottom: -20%; right: -10%; animation-delay: -6s; animation-duration: 22s; }
+    .orb3 { width: 35vw; height: 35vw; background: var(--orb3); top: 40%; left: 50%; animation-delay: -12s; animation-duration: 26s; }
+    .bg-pulse-layer {
+      position: absolute; inset: -20%;
+      pointer-events: none; opacity: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 30%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 20%, color-mix(in srgb, var(--accent2) 50%, transparent), transparent 55%),
+        radial-gradient(ellipse 55% 45% at 50% 80%, color-mix(in srgb, var(--accent3) 45%, transparent), transparent 55%),
+        radial-gradient(ellipse 70% 70% at 50% 50%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%);
+      mix-blend-mode: screen;
+      transition: opacity 0.15s ease;
+      will-change: transform, filter, opacity;
+    }
+    .bg.pulse-active .bg-pulse-layer { opacity: 1; }
+    .bg.pulse-active .orb {
+      transition: filter 0.06s linear, transform 0.06s linear, opacity 0.06s linear;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(4%,-6%) scale(1.05); }
+      66% { transform: translate(-5%,4%) scale(0.97); }
+    }
+    .app {
+      position: relative; z-index: 1; height: 100%; display: grid;
+      grid-template-columns: 1fr 300px; gap: 16px; padding: 16px;
+      max-width: 1280px; margin: 0 auto;
+      box-sizing: border-box;
+    }
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+        padding: 10px; gap: 10px; height: 100dvh;
+      }
+      .player { padding: 12px 12px 10px; overflow: hidden; }
+      .playlist { max-height: 30vh; min-height: 100px; }
+      .cover-wrap { width: min(130px, 36vw, 22vh) !important; margin-top: 2px; margin-bottom: 4px; }
+      .cover { width: min(130px, 36vw, 22vh) !important; height: min(130px, 36vw, 22vh) !important; border-radius: 18px !important; }
+      .eq { height: 28px; margin-top: 6px; }
+      .track-meta { margin-bottom: 6px; }
+      .track-meta h1 { font-size: 1.1rem; }
+      .progress-row { margin-bottom: 6px; }
+      .controls { margin-bottom: 6px; gap: 10px; }
+      .btn-play { width: 66px !important; height: 66px !important; }
+      .btn-prev, .btn-next { width: 48px !important; height: 48px !important; }
+      .btn-repeat { width: 44px !important; height: 44px !important; }
+      .extra-controls { margin-bottom: 6px; }
+      .btn-sm { width: 40px; height: 40px; flex: 0 0 40px; }
+      .extra-controls { gap: 12px; }
+    }
+    @media (max-height: 780px) {
+      .cover-wrap { width: min(140px, 32vw, 24vh); margin-top: 2px; margin-bottom: 4px; }
+      .cover { width: min(140px, 32vw, 24vh); height: min(140px, 32vw, 24vh); }
+      .eq { height: 28px; margin-top: 6px; }
+      .player { padding: 12px 18px 10px; overflow: hidden; }
+      .track-meta { margin-bottom: 6px; }
+      .track-meta h1 { font-size: 1.25rem; }
+      .progress-row { margin-bottom: 6px; }
+      .controls { margin-bottom: 6px; }
+      .extra-controls { margin-bottom: 6px; }
+      .btn-play { width: 66px; height: 66px; }
+      .btn-prev, .btn-next { width: 48px; height: 48px; }
+      .btn-repeat { width: 44px; height: 44px; }
+    }
+    .glass {
+      background: var(--glass); backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--glass-border); border-radius: var(--radius);
+      box-shadow: var(--shadow), inset 0 1px 0 0 var(--glass-highlight);
+      transition: background 0.5s, border-color 0.5s, box-shadow 0.5s;
+    }
+    .player {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 18px 24px 16px; position: relative; overflow: hidden;
+      min-height: 0; height: 100%;
+      gap: 0;
+    }
+    .player::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent), color-mix(in srgb, var(--accent2) 8%, transparent));
+      transition: background 0.6s;
+    }
+    .cover-wrap {
+      position: relative;
+      width: min(168px, 38vw, 28vh);
+      margin-top: 4px;
+      margin-bottom: 6px;
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0;
+    }
+    .cover {
+      width: min(168px, 38vw, 28vh); height: min(168px, 38vw, 28vh);
+      border-radius: 22px;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent2) 30%, transparent));
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.3), inset 0 0 40px color-mix(in srgb, var(--accent) 12%, transparent);
+      position: relative; overflow: hidden; transition: background 0.5s, box-shadow 0.5s;
+      flex-shrink: 0;
+    }
+    .cover.has-art { background: #111; }
+    .cover.playing { animation: pulse-glow 3s ease-in-out infinite; }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 30px color-mix(in srgb, var(--accent) 25%, transparent); }
+      50% { box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 50px color-mix(in srgb, var(--accent2) 40%, transparent); }
+    }
+    .cover-img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      border-radius: 26px; opacity: 0; transition: opacity 0.4s ease; z-index: 1;
+    }
+    .cover-img.visible { opacity: 1; }
+    .cover-overlay {
+      position: absolute; inset: 0; border-radius: 26px; z-index: 2; opacity: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.2) 100%);
+      transition: opacity 0.3s; pointer-events: none;
+    }
+    .cover.has-art .cover-overlay { opacity: 1; }
+    .eq {
+      display: flex; align-items: flex-end; justify-content: stretch; gap: 2px;
+      height: min(36px, 5vh);
+      width: 100%;
+      margin-top: 8px;
+      padding: 0;
+      box-sizing: border-box;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+    .eq span {
+      flex: 1 1 0; min-width: 0;
+      background: linear-gradient(to top, var(--accent), var(--accent2));
+      border-radius: 3px; height: 8%; min-height: 4px;
+      transition: height 0.05s ease-out, background 0.4s;
+      box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+    .eq.hidden { display: none; }
+    .track-meta { text-align: center; margin-bottom: 8px; width: 100%; max-width: 400px; flex-shrink: 0; }
+    .track-meta h1 {
+      font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: -0.02em;
+      margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background: linear-gradient(90deg, #fff, var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .track-meta p { color: var(--text-dim); font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 380px; margin-bottom: 8px; flex-shrink: 0; }
+    .time { font-size: 0.74rem; color: var(--text-dim); font-variant-numeric: tabular-nums; min-width: 36px; }
+    .time.right { text-align: right; }
+    .progress-bar {
+      flex: 1; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.12); outline: none; cursor: pointer;
+    }
+    .progress-bar::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+      cursor: pointer; border: 2px solid rgba(255,255,255,0.3); transition: transform 0.15s;
+    }
+    .progress-bar::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .progress-bar::-moz-range-thumb {
+      width: 15px; height: 15px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: 2px solid rgba(255,255,255,0.3); cursor: pointer;
+    }
+    .controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; flex-shrink: 0; }
+    .btn {
+      background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: var(--text);
+      border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease; backdrop-filter: blur(10px);
+    }
+    .btn:hover { background: rgba(255,255,255,0.15); border-color: var(--glass-highlight); transform: scale(1.08); }
+    .btn:active { transform: scale(0.95); }
+    .btn.active {
+      background: color-mix(in srgb, var(--accent) 25%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      color: var(--accent); box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    .btn-prev, .btn-next { width: 54px; height: 54px; }
+    .btn-play {
+      width: 76px; height: 76px;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, transparent), color-mix(in srgb, var(--accent2) 35%, transparent));
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+    .btn-play:hover {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 50%, transparent), color-mix(in srgb, var(--accent2) 50%, transparent));
+      box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    .btn svg { width: 20px; height: 20px; fill: currentColor; }
+    .btn-play svg { width: 32px; height: 32px; }
+    .btn-prev svg, .btn-next svg { width: 26px; height: 26px; }
+    .btn-repeat {
+      position: relative;
+    }
+    .repeat-badge {
+      position: absolute; right: 5px; bottom: 5px;
+      font-size: 0.58rem; font-weight: 700; line-height: 1;
+      color: var(--text-dim); pointer-events: none;
+    }
+    .btn-repeat.active .repeat-badge { color: var(--accent); }
+    .extra-controls {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 8px; flex-wrap: nowrap; flex-shrink: 0;
+    }
+    .btn-sm {
+      width: 40px; height: 40px; border-radius: 12px;
+      flex: 0 0 40px; position: relative;
+    }
+    .btn-sm svg { width: 18px; height: 18px; }
+    .timer-label {
+      position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%);
+      font-size: 0.55rem; font-weight: 600; color: var(--accent);
+      font-variant-numeric: tabular-nums; pointer-events: none;
+      white-space: nowrap; line-height: 1;
+    }
+    .btn-sm#timerBtn.active .timer-label,
+    .btn-sm.active .timer-label { color: var(--accent); }
+    .volume-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 240px; flex-shrink: 0; margin-bottom: 0; }
+    .volume-row svg { width: 18px; height: 18px; fill: var(--text-dim); flex-shrink: 0; }
+    .volume-bar {
+      flex: 1; -webkit-appearance: none; appearance: none; height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.12); outline: none; cursor: pointer;
+    }
+    .volume-bar::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
+      background: var(--accent3); box-shadow: 0 0 8px color-mix(in srgb, var(--accent3) 50%, transparent);
+      cursor: pointer; border: none;
+    }
+    .volume-bar::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--accent3); border: none; cursor: pointer; }
+    .playlist { display: flex; flex-direction: column; padding: 24px 0; overflow: hidden; }
+    .playlist-header { padding: 0 24px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .playlist-header h2 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; }
+    .track-count { font-size: 0.78rem; color: var(--text-dim); background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 20px; }
+    .track-list { list-style: none; overflow-y: auto; flex: 1; padding: 0 12px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
+    .track-list::-webkit-scrollbar { width: 5px; }
+    .track-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+    .track-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px;
+      cursor: pointer; transition: all 0.2s ease; margin-bottom: 3px;
+    }
+    .track-item:hover { background: rgba(255,255,255,0.07); }
+    .track-item.active {
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--accent2) 12%, transparent));
+      border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+    .track-thumb {
+      width: 36px; height: 36px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent2) 40%, transparent));
+      border: 1px solid var(--glass-border);
+    }
+    .track-info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .track-title { font-size: 0.88rem; font-weight: 450; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-item.active .track-title { color: var(--accent); font-weight: 500; }
+    .track-artist { font-size: 0.72rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .playing-indicator { width: 16px; height: 16px; display: none; flex-shrink: 0; }
+    .track-item.active .playing-indicator { display: block; }
+    .playing-indicator svg { width: 16px; height: 16px; fill: var(--accent); animation: pulse-icon 1.2s ease-in-out infinite; }
+    @keyframes pulse-icon { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; color: var(--text-dim); text-align: center; padding: 40px; gap: 12px;
+    }
+    .empty svg { width: 48px; height: 48px; opacity: 0.4; margin-bottom: 8px; }
+    .empty p { font-size: 0.95rem; line-height: 1.5; }
+    .empty code { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; }
+    .status {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(14px); padding: 8px 18px; border-radius: 20px;
+      font-size: 0.8rem; color: var(--text-dim); border: 1px solid var(--glass-border);
+      z-index: 10; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+    }
+    .status.show { opacity: 1; }
+    .theme-btn-wrap { position: relative; }
+    .theme-menu {
+      position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+      background: var(--glass); backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--glass-border); border-radius: 16px; padding: 10px;
+      display: none; flex-direction: column; gap: 6px; box-shadow: 0 12px 32px rgba(0,0,0,0.4); z-index: 20; min-width: 140px;
+    }
+    .theme-menu.open { display: flex; }
+    .theme-option {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px;
+      cursor: pointer; border: none; background: transparent; color: var(--text);
+      font-size: 0.85rem; font-family: inherit; transition: background 0.15s; width: 100%; text-align: left;
+    }
+    .theme-option:hover { background: rgba(255,255,255,0.1); }
+    .theme-option.active { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); }
+    .theme-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.3); }
+    .theme-dot.aurora { background: linear-gradient(135deg, #7dd3fc, #c084fc); }
+    .theme-dot.ocean { background: linear-gradient(135deg, #38bdf8, #22d3ee); }
+    .theme-dot.sunset { background: linear-gradient(135deg, #fb923c, #f472b6); }
+    .theme-dot.emerald { background: linear-gradient(135deg, #34d399, #2dd4bf); }
+    .theme-dot.amethyst { background: linear-gradient(135deg, #c084fc, #a78bfa); }
+  
+    /* Settings panel */
+    .settings-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.25s ease;
+    }
+    .settings-overlay.open { display: flex; opacity: 1; }
+    .settings-panel {
+      width: min(360px, 92vw); max-height: 85vh; overflow-y: auto;
+      padding: 24px; border-radius: 24px;
+      background: var(--glass);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 0 var(--glass-highlight);
+      animation: panelIn 0.28s ease;
+    }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .settings-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .settings-header h3 {
+      font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 600;
+    }
+    .settings-close {
+      width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.06); color: var(--text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .settings-close:hover { background: rgba(255,255,255,0.12); }
+    .settings-close svg { width: 16px; height: 16px; fill: currentColor; }
+    .settings-section { margin-bottom: 22px; }
+    .settings-section:last-child { margin-bottom: 0; }
+    .scan-select {
+      width: 100%; margin-top: 8px; padding: 10px 12px;
+      border-radius: 12px; border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.06); color: var(--text);
+      font-family: inherit; font-size: 0.9rem; cursor: pointer;
+      outline: none; appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+                        linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px; background-repeat: no-repeat;
+    }
+    .scan-select:focus { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+    .scan-select option { background: #1a1a2e; color: #fff; }
+    .settings-label {
+      font-size: 0.78rem; font-weight: 500; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;
+    }
+    .theme-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .theme-card {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 12px; border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.15s;
+      font-size: 0.85rem; color: var(--text); font-family: inherit;
+    }
+    .theme-card:hover { background: rgba(255,255,255,0.09); }
+    .theme-card.active {
+      border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      color: var(--accent);
+    }
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      margin-bottom: 8px;
+    }
+    .toggle-row:last-child { margin-bottom: 0; }
+    .toggle-row span { font-size: 0.9rem; }
+    .toggle {
+      position: relative; width: 44px; height: 24px; border-radius: 12px;
+      background: rgba(255,255,255,0.12); border: none; cursor: pointer;
+      transition: background 0.2s; flex-shrink: 0;
+    }
+    .toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%; background: #fff;
+      transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .toggle.on {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+    .toggle.on::after { transform: translateX(20px); }
+    /* hide helpers */
+    .eq.hidden { display: none; }
+    .cover.hide-art .cover-img { opacity: 0 !important; }
+    .cover.hide-art.has-art .cover-overlay { opacity: 0; }
+    .cover.hide-art { background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent2) 30%, transparent)) !important; }
+
+
+    /* Playlist collapse */
+    .app.playlist-collapsed {
+      grid-template-columns: 1fr;
+    }
+    .app.playlist-collapsed .playlist {
+      display: none;
+    }
+    /* Larger UI when playlist is collapsed */
+    .app.playlist-collapsed .cover-wrap {
+      width: min(240px, 48vw, 36vh);
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+    .app.playlist-collapsed .cover {
+      width: min(240px, 48vw, 36vh);
+      height: min(240px, 48vw, 36vh);
+      border-radius: 28px;
+    }
+    .app.playlist-collapsed .eq {
+      height: min(48px, 6vh);
+      margin-top: 12px;
+    }
+    .app.playlist-collapsed .btn-prev,
+    .app.playlist-collapsed .btn-next {
+      width: 64px;
+      height: 64px;
+    }
+    .app.playlist-collapsed .btn-play {
+      width: 88px;
+      height: 88px;
+    }
+    .app.playlist-collapsed .btn-play svg {
+      width: 38px;
+      height: 38px;
+    }
+    .app.playlist-collapsed .btn-prev svg,
+    .app.playlist-collapsed .btn-next svg {
+      width: 30px;
+      height: 30px;
+    }
+    .app.playlist-collapsed .btn-sm {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      border-radius: 14px;
+    }
+    .app.playlist-collapsed .btn-sm svg {
+      width: 22px;
+      height: 22px;
+    }
+    .app.playlist-collapsed .extra-controls {
+      gap: 16px;
+    }
+    .app.playlist-collapsed .track-meta h1 {
+      font-size: 1.55rem;
+    }
+    .app.playlist-collapsed .controls {
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+    .playlist-toggle {
+      width: 32px; height: 32px; border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.06); color: var(--text);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .playlist-toggle:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--glass-highlight);
+    }
+    .playlist-toggle svg { width: 16px; height: 16px; fill: currentColor; }
+    .show-playlist-btn {
+      position: fixed; top: 50%; right: 12px; transform: translateY(-50%);
+      z-index: 30; width: 40px; height: 40px; border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--text); cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      transition: all 0.2s;
+    }
+    .show-playlist-btn:hover {
+      background: color-mix(in srgb, var(--accent) 20%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+      color: var(--accent);
+      transform: translateY(-50%) scale(1.06);
+    }
+    .show-playlist-btn.visible { display: flex; }
+    .show-playlist-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    @media (max-width: 900px) {
+      .app.playlist-collapsed { grid-template-rows: 1fr; }
+      .app.playlist-collapsed .playlist { display: none; }
+      .app.playlist-collapsed .cover-wrap {
+        width: min(180px, 52vw, 28vh) !important;
+        margin-top: 6px; margin-bottom: 8px;
+      }
+      .app.playlist-collapsed .cover {
+        width: min(180px, 52vw, 28vh) !important;
+        height: min(180px, 52vw, 28vh) !important;
+        border-radius: 22px !important;
+      }
+      .app.playlist-collapsed .eq { height: 36px; margin-top: 10px; }
+      .app.playlist-collapsed .btn-play { width: 78px !important; height: 78px !important; }
+      .app.playlist-collapsed .btn-prev,
+      .app.playlist-collapsed .btn-next { width: 56px !important; height: 56px !important; }
+      .app.playlist-collapsed .btn-sm { width: 44px; height: 44px; flex: 0 0 44px; }
+      .app.playlist-collapsed .extra-controls { gap: 14px; }
+      .show-playlist-btn { top: auto; bottom: 16px; right: 16px; transform: none; }
+      .show-playlist-btn:hover { transform: scale(1.06); }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="bg">
+    <div class="bg-pulse-layer" id="bgPulseLayer"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="app">
+    <div class="player glass">
+      <div class="cover-wrap">
+        <div class="cover" id="cover">
+          <img class="cover-img" id="coverImg" alt="" />
+          <div class="cover-overlay"></div>
+        </div>
+        <div class="eq" id="eq">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="track-meta">
+        <h1 id="title">Liquid Glass Radio</h1>
+        <p id="subtitle">Выберите трек из каталога</p>
+      </div>
+      <div class="progress-row">
+        <span class="time" id="currentTime">0:00</span>
+        <input type="range" class="progress-bar" id="progress" min="0" max="1000" value="0" />
+        <span class="time right" id="duration">0:00</span>
+      </div>
+      <div class="controls">
+        <button class="btn btn-prev" id="prevBtn" title="Предыдущий">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="btn btn-play" id="playBtn" title="Играть / Пауза">
+          <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="btn btn-next" id="nextBtn" title="Следующий">
+          <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+      </div>
+      <div class="extra-controls">
+        <button class="btn btn-sm" id="shuffleBtn" title="Случайный порядок">
+          <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.12 3.7 3.71 5.11l5.46 5.46 1.42-1.4zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+        </button>
+        <button class="btn btn-sm btn-repeat" id="repeatBtn" title="Повтор 1 трека">
+          <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+          <span class="repeat-badge">1</span>
+        </button>
+        <button class="btn btn-sm" id="timerBtn" title="Таймер остановки">
+          <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          <span class="timer-label" id="timerLabel"></span>
+        </button>
+        <button class="btn btn-sm" id="settingsBtn" title="Настройки">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+        </button>
+      </div>
+      <div class="volume-row">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <input type="range" class="volume-bar" id="volume" min="0" max="1" step="0.01" value="0.85" />
+      </div>
+    </div>
+    <div class="playlist glass">
+      <div class="playlist-header">
+        <h2>Каталог</h2>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="track-count" id="trackCount">0</span>
+          <button class="playlist-toggle" id="playlistToggle" title="Свернуть плейлист">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+        </div>
+      </div>
+      <ul class="track-list" id="trackList"></ul>
+    </div>
+  </div>
+  
+  <!-- Settings modal -->
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-panel glass" id="settingsPanel">
+      <div class="settings-header">
+        <h3>Настройки</h3>
+        <button class="settings-close" id="settingsClose" title="Закрыть">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Тема Liquid Glass</div>
+        <div class="theme-grid" id="themeGrid">
+          <button class="theme-card" data-theme="aurora"><span class="theme-dot aurora"></span> Aurora</button>
+          <button class="theme-card" data-theme="ocean"><span class="theme-dot ocean"></span> Ocean</button>
+          <button class="theme-card" data-theme="sunset"><span class="theme-dot sunset"></span> Sunset</button>
+          <button class="theme-card" data-theme="emerald"><span class="theme-dot emerald"></span> Emerald</button>
+          <button class="theme-card" data-theme="amethyst"><span class="theme-dot amethyst"></span> Amethyst</button>
+        </div>
+        <div class="toggle-row" style="margin-top:12px;">
+          <span>Тема под обложку</span>
+          <button class="toggle" id="toggleCoverTheme" aria-pressed="false" title="Цвета интерфейса из обложки"></button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Отображение</div>
+        <div class="toggle-row">
+          <span>Эквалайзер</span>
+          <button class="toggle on" id="toggleEq" aria-pressed="true" title="Показать/скрыть эквалайзер"></button>
+        </div>
+        <div class="toggle-row">
+          <span>Обложка трека</span>
+          <button class="toggle on" id="toggleCover" aria-pressed="true" title="Показать/скрыть обложку"></button>
+        </div>
+        <div class="toggle-row">
+          <span>Перелив цветов в ритме</span>
+          <button class="toggle" id="toggleColorPulse" aria-pressed="false" title="Плавный перелив цветов темы в такт музыке"></button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Сканирование каталога</div>
+        <div style="color:var(--text-dim);font-size:0.8rem;margin-bottom:6px;">Интервал проверки новых треков</div>
+        <select class="scan-select" id="scanIntervalSelect" title="Интервал сканирования">
+          <option value="5">5 секунд</option>
+          <option value="30">30 секунд</option>
+          <option value="60">1 минута</option>
+          <option value="900">15 минут</option>
+          <option value="3600">1 час</option>
+          <option value="0">Отключить сканирование</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="show-playlist-btn" id="showPlaylistBtn" title="Показать плейлист">
+    <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+  </button>
+  <div class="status" id="status"></div>
+  <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progress = document.getElementById('progress');
+    const volume = document.getElementById('volume');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const titleEl = document.getElementById('title');
+    const subtitleEl = document.getElementById('subtitle');
+    const cover = document.getElementById('cover');
+    const coverImg = document.getElementById('coverImg');
+    const eqEl = document.getElementById('eq');
+    const eqBars = eqEl.querySelectorAll('span');
+    const trackList = document.getElementById('trackList');
+    const trackCount = document.getElementById('trackCount');
+    const statusEl = document.getElementById('status');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const timerBtn = document.getElementById('timerBtn');
+    const timerLabel = document.getElementById('timerLabel');
+    const playlistToggle = document.getElementById('playlistToggle');
+    const showPlaylistBtn = document.getElementById('showPlaylistBtn');
+    const appEl = document.querySelector('.app');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const settingsClose = document.getElementById('settingsClose');
+    const themeGrid = document.getElementById('themeGrid');
+    const toggleEq = document.getElementById('toggleEq');
+    const toggleCover = document.getElementById('toggleCover');
+    const toggleColorPulse = document.getElementById('toggleColorPulse');
+    const toggleCoverTheme = document.getElementById('toggleCoverTheme');
+
+    let tracks = [], currentIndex = -1, isSeeking = false;
+    let shuffleOn = false, repeatOn = false;
+    let timerMinutes = 0, timerEnd = 0, timerInterval = null;
+    let showEq = true, showCover = true, coverThemeOn = false, colorPulseOn = false;
+
+    // Web Audio API for real-time equalizer
+    let audioCtx = null, analyser = null, sourceNode = null, freqData = null;
+    let animId = null, isVisualizing = false;
+
+    const playSvg = '<path d="M8 5v14l11-7z"/>';
+    const pauseSvg = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+    const THEMES = ['aurora','ocean','sunset','emerald','amethyst'];
+    const TIMER_OPTIONS = [0, 15, 30, 45, 60];
+    const BAR_COUNT = eqBars.length;
+
+    function showStatus(msg, ms) {
+      ms = ms || 2200;
+      statusEl.textContent = msg;
+      statusEl.classList.add('show');
+      clearTimeout(showStatus._t);
+      showStatus._t = setTimeout(function() { statusEl.classList.remove('show'); }, ms);
+    }
+    function formatTime(sec) {
+      if (!isFinite(sec) || isNaN(sec)) return '0:00';
+      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+      return m + ':' + String(s).padStart(2, '0');
+    }
+    function setPlaying(playing) {
+      if (playing) {
+        playIcon.innerHTML = pauseSvg;
+        cover.classList.add('playing');
+        startVisualizer();
+      } else {
+        playIcon.innerHTML = playSvg;
+        cover.classList.remove('playing');
+        stopVisualizer();
+      }
+    }
+    function escapeHtml(str) {
+      const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+    }
+    function hashStr(s) {
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
+      return Math.abs(h);
+    }
+
+    // ===== Real-time audio visualizer =====
+    function initAudioContext() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.72;
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+      sourceNode = audioCtx.createMediaElementSource(audio);
+      sourceNode.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    }
+    function needsVisualizer() {
+      return (showEq || colorPulseOn) && !audio.paused;
+    }
+    function startVisualizer() {
+      if (!showEq && !colorPulseOn) return;
+      if (isVisualizing) return;
+      initAudioContext();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      isVisualizing = true;
+      draw();
+    }
+    function stopVisualizer() {
+      isVisualizing = false;
+      if (animId) { cancelAnimationFrame(animId); animId = null; }
+      for (let i = 0; i < BAR_COUNT; i++) eqBars[i].style.height = '8%';
+      resetColorPulse();
+    }
+    function resetColorPulse() {
+      var root = document.documentElement.style;
+      root.removeProperty('--pulse-boost');
+      var bg = document.querySelector('.bg');
+      if (bg) {
+        bg.classList.remove('pulse-active');
+        bg.style.removeProperty('filter');
+        bg.style.removeProperty('background');
+      }
+      var layer = document.getElementById('bgPulseLayer');
+      if (layer) {
+        layer.style.removeProperty('transform');
+        layer.style.removeProperty('filter');
+        layer.style.removeProperty('opacity');
+        layer.style.removeProperty('background');
+      }
+      document.querySelectorAll('.orb').forEach(function(o) {
+        o.style.removeProperty('filter');
+        o.style.removeProperty('transform');
+        o.style.removeProperty('opacity');
+      });
+      document.querySelectorAll('.glass').forEach(function(g) {
+        g.style.removeProperty('box-shadow');
+      });
+    }
+    var pulseSmooth = 0, pulseSmoothB = 0, pulseSmoothM = 0, pulseSmoothT = 0;
+    var pulsePhase = 0;
+    function draw() {
+      if (!isVisualizing) return;
+      animId = requestAnimationFrame(draw);
+      if (!analyser || !freqData) return;
+      analyser.getByteFrequencyData(freqData);
+      const binCount = freqData.length;
+      if (showEq) {
+        const step = Math.max(1, Math.floor(binCount / (BAR_COUNT + 4)));
+        for (let i = 0; i < BAR_COUNT; i++) {
+          let sum = 0;
+          const start = (i + 1) * step;
+          for (let j = 0; j < step; j++) sum += freqData[Math.min(start + j, binCount - 1)] || 0;
+          const avg = sum / step;
+          const pct = Math.max(8, Math.min(100, (avg / 255) * 115));
+          eqBars[i].style.height = pct + '%';
+        }
+      }
+      if (colorPulseOn) {
+        var bass = 0, mid = 0, treble = 0, nB = 0, nM = 0, nT = 0;
+        var third = Math.floor(binCount / 3);
+        for (var bi = 0; bi < third; bi++) { bass += freqData[bi]; nB++; }
+        for (var mi = third; mi < third * 2; mi++) { mid += freqData[mi]; nM++; }
+        for (var ti = third * 2; ti < binCount; ti++) { treble += freqData[ti]; nT++; }
+        bass = nB ? bass / nB / 255 : 0;
+        mid = nM ? mid / nM / 255 : 0;
+        treble = nT ? treble / nT / 255 : 0;
+        pulseSmoothB = pulseSmoothB * 0.7 + bass * 0.3;
+        pulseSmoothM = pulseSmoothM * 0.75 + mid * 0.25;
+        pulseSmoothT = pulseSmoothT * 0.8 + treble * 0.2;
+        pulseSmooth = pulseSmooth * 0.72 + Math.min(1, bass * 0.55 + mid * 0.35 + treble * 0.2) * 0.28;
+        pulsePhase += 0.02 + pulseSmooth * 0.08;
+
+        var b = pulseSmoothB, m = pulseSmoothM, t = pulseSmoothT, e = pulseSmooth;
+        var bg = document.querySelector('.bg');
+        if (bg) bg.classList.add('pulse-active');
+
+        // Full-screen multi-color wash driven by bands
+        var layer = document.getElementById('bgPulseLayer');
+        if (layer) {
+          var a1 = (0.25 + b * 0.55).toFixed(2);
+          var a2 = (0.22 + m * 0.5).toFixed(2);
+          var a3 = (0.18 + t * 0.48).toFixed(2);
+          var x1 = (15 + Math.sin(pulsePhase) * 25 + b * 20).toFixed(1);
+          var y1 = (25 + Math.cos(pulsePhase * 0.8) * 20).toFixed(1);
+          var x2 = (75 + Math.cos(pulsePhase * 1.1) * 20).toFixed(1);
+          var y2 = (20 + Math.sin(pulsePhase * 0.9) * 25 + m * 15).toFixed(1);
+          var x3 = (50 + Math.sin(pulsePhase * 0.7) * 30).toFixed(1);
+          var y3 = (75 + Math.cos(pulsePhase * 1.2) * 15 + t * 10).toFixed(1);
+          var hue1 = (b * 40).toFixed(0);
+          var hue2 = (120 + m * 50).toFixed(0);
+          var hue3 = (240 + t * 60).toFixed(0);
+          layer.style.background =
+            'radial-gradient(ellipse 65% 55% at ' + x1 + '% ' + y1 + '%, color-mix(in srgb, var(--accent) ' + (35 + b * 50).toFixed(0) + '%, transparent), transparent 62%),' +
+            'radial-gradient(ellipse 55% 65% at ' + x2 + '% ' + y2 + '%, color-mix(in srgb, var(--accent2) ' + (30 + m * 50).toFixed(0) + '%, transparent), transparent 58%),' +
+            'radial-gradient(ellipse 60% 50% at ' + x3 + '% ' + y3 + '%, color-mix(in srgb, var(--accent3) ' + (28 + t * 48).toFixed(0) + '%, transparent), transparent 60%),' +
+            'radial-gradient(ellipse 45% 40% at ' + (30 + t * 40).toFixed(0) + '% ' + (60 + b * 20).toFixed(0) + '%, color-mix(in srgb, var(--accent2) ' + (20 + e * 40).toFixed(0) + '%, transparent), transparent 55%),' +
+            'radial-gradient(ellipse 80% 80% at 50% 50%, color-mix(in srgb, var(--accent) ' + (8 + e * 22).toFixed(0) + '%, transparent), transparent 70%)';
+          layer.style.filter = 'saturate(' + (1.2 + e * 0.8).toFixed(2) + ') brightness(' + (0.95 + e * 0.35).toFixed(2) + ')';
+          layer.style.opacity = String(0.55 + e * 0.45);
+          layer.style.transform = 'scale(' + (1 + e * 0.08).toFixed(3) + ') rotate(' + (e * 3).toFixed(1) + 'deg)';
+        }
+
+        // Each orb reacts to a different band with different hue shift
+        var orbs = document.querySelectorAll('.orb');
+        if (orbs[0]) {
+          orbs[0].style.filter = 'hue-rotate(' + (b * 50).toFixed(0) + 'deg) saturate(' + (1 + b * 0.9).toFixed(2) + ') brightness(' + (0.9 + b * 0.5).toFixed(2) + ')';
+          orbs[0].style.transform = 'scale(' + (1 + b * 0.15).toFixed(3) + ') translate(' + (b * 2).toFixed(1) + '%, ' + (-b * 2).toFixed(1) + '%)';
+          orbs[0].style.opacity = String(0.7 + b * 0.3);
+        }
+        if (orbs[1]) {
+          orbs[1].style.filter = 'hue-rotate(' + (80 + m * 70).toFixed(0) + 'deg) saturate(' + (1 + m * 0.85).toFixed(2) + ') brightness(' + (0.9 + m * 0.45).toFixed(2) + ')';
+          orbs[1].style.transform = 'scale(' + (1 + m * 0.18).toFixed(3) + ') translate(' + (-m * 3).toFixed(1) + '%, ' + (m * 2).toFixed(1) + '%)';
+          orbs[1].style.opacity = String(0.65 + m * 0.35);
+        }
+        if (orbs[2]) {
+          orbs[2].style.filter = 'hue-rotate(' + (180 + t * 90).toFixed(0) + 'deg) saturate(' + (1 + t * 0.9).toFixed(2) + ') brightness(' + (0.9 + t * 0.5).toFixed(2) + ')';
+          orbs[2].style.transform = 'scale(' + (1 + t * 0.2).toFixed(3) + ')';
+          orbs[2].style.opacity = String(0.6 + t * 0.4);
+        }
+
+        document.querySelectorAll('.glass').forEach(function(g) {
+          g.style.boxShadow =
+            '0 0 ' + (18 + e * 50).toFixed(0) + 'px color-mix(in srgb, var(--accent) ' + (10 + b * 30).toFixed(0) + '%, transparent),' +
+            '0 0 ' + (12 + m * 36).toFixed(0) + 'px color-mix(in srgb, var(--accent2) ' + (8 + m * 25).toFixed(0) + '%, transparent)';
+        });
+        document.documentElement.style.setProperty('--pulse-boost', e.toFixed(3));
+      }
+    }
+
+
+    // Cover-based theme
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return [h * 360, s * 100, l * 100];
+    }
+
+    function extractCoverColors(img) {
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 48;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        // bucket by hue
+        const buckets = {};
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+          if (a < 128) continue;
+          const [h, s, l] = rgbToHsl(r, g, b);
+          if (s < 18 || l < 12 || l > 88) continue; // skip gray/too dark/light
+          const key = Math.round(h / 12) * 12;
+          if (!buckets[key]) buckets[key] = { n: 0, r: 0, g: 0, b: 0, s: 0, l: 0, h: 0 };
+          const bk = buckets[key];
+          bk.n++; bk.r += r; bk.g += g; bk.b += b; bk.s += s; bk.l += l; bk.h += h;
+        }
+        const sorted = Object.values(buckets).sort(function(a, b) { return b.n - a.n; });
+        if (!sorted.length) return null;
+        function avg(bk) {
+          return {
+            r: Math.round(bk.r / bk.n),
+            g: Math.round(bk.g / bk.n),
+            b: Math.round(bk.b / bk.n),
+            h: bk.h / bk.n,
+            s: bk.s / bk.n,
+            l: bk.l / bk.n
+          };
+        }
+        const c1 = avg(sorted[0]);
+        const c2 = sorted.length > 1 ? avg(sorted[1]) : c1;
+        const c3 = sorted.length > 2 ? avg(sorted[2]) : c2;
+        return [c1, c2, c3];
+      } catch (e) {
+        console.warn('cover color extract failed', e);
+        return null;
+      }
+    }
+
+    function clearCoverThemeVars() {
+      const root = document.documentElement.style;
+      const keys = ['--accent', '--accent2', '--accent3', '--orb1', '--orb2', '--orb3',
+        '--bg-grad1', '--bg-grad2', '--bg-grad3', '--bg', '--glass', '--glass-border', '--glass-highlight', '--text', '--text-dim'];
+      keys.forEach(function(k) { root.removeProperty(k); });
+      document.documentElement.removeAttribute('data-cover-theme');
+    }
+
+    function applyCoverThemeFromColors(colors) {
+      if (!colors || !colors.length) return;
+      const c1 = colors[0], c2 = colors[1] || c1, c3 = colors[2] || c2;
+      function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+      function hsl(h, s, l) { return 'hsl(' + Math.round(h) + ' ' + Math.round(s) + '% ' + Math.round(l) + '%)'; }
+      // vivid accents
+      const a1 = hsl(c1.h, clamp(c1.s, 55, 85), clamp(c1.l, 55, 72));
+      const a2 = hsl(c2.h, clamp(c2.s, 50, 80), clamp(c2.l, 50, 68));
+      const a3 = hsl(c3.h, clamp(c3.s, 45, 75), clamp(c3.l, 58, 75));
+      const orb1 = 'linear-gradient(135deg, ' + hsl(c1.h, clamp(c1.s, 60, 90), clamp(c1.l, 35, 55)) + ', ' + hsl(c2.h, clamp(c2.s, 55, 85), clamp(c2.l, 30, 50)) + ')';
+      const orb2 = 'linear-gradient(135deg, ' + hsl(c2.h, clamp(c2.s, 55, 85), clamp(c2.l, 32, 52)) + ', ' + hsl(c3.h, clamp(c3.s, 50, 80), clamp(c3.l, 28, 48)) + ')';
+      const orb3 = 'linear-gradient(135deg, ' + hsl(c3.h, clamp(c3.s, 50, 80), clamp(c3.l, 30, 50)) + ', ' + hsl(c1.h, clamp(c1.s, 55, 85), clamp(c1.l, 28, 45)) + ')';
+      // dark bg tinted by cover
+      const bg = hsl(c1.h, clamp(c1.s * 0.4, 15, 35), 4);
+      const g1 = hsl(c1.h, clamp(c1.s * 0.5, 20, 40), 12);
+      const g2 = hsl(c2.h, clamp(c2.s * 0.45, 18, 38), 10);
+      const g3 = hsl(c3.h, clamp(c3.s * 0.4, 15, 35), 8);
+      const root = document.documentElement.style;
+      root.setProperty('--accent', a1);
+      root.setProperty('--accent2', a2);
+      root.setProperty('--accent3', a3);
+      root.setProperty('--orb1', orb1);
+      root.setProperty('--orb2', orb2);
+      root.setProperty('--orb3', orb3);
+      root.setProperty('--bg', bg);
+      root.setProperty('--bg-grad1', g1);
+      root.setProperty('--bg-grad2', g2);
+      root.setProperty('--bg-grad3', g3);
+      root.setProperty('--glass', 'rgba(255,255,255,0.07)');
+      root.setProperty('--glass-border', 'rgba(255,255,255,0.14)');
+      root.setProperty('--glass-highlight', 'rgba(255,255,255,0.2)');
+      root.setProperty('--text', '#f5f7ff');
+      root.setProperty('--text-dim', 'rgba(240,244,255,0.55)');
+      document.documentElement.setAttribute('data-cover-theme', '1');
+    }
+
+    function refreshCoverTheme() {
+      if (!coverThemeOn) {
+        clearCoverThemeVars();
+        applyTheme(localStorage.getItem('lgr-theme') || 'aurora');
+        return;
+      }
+      if (coverImg.classList.contains('visible') && coverImg.complete && coverImg.naturalWidth) {
+        const colors = extractCoverColors(coverImg);
+        if (colors) applyCoverThemeFromColors(colors);
+      } else if (currentIndex >= 0 && tracks[currentIndex]) {
+        // fallback from title hash when no art
+        const t = tracks[currentIndex];
+        const h = hashStr(t.title + (t.artist || ''));
+        const c1 = { h: h % 360, s: 65, l: 55, r: 0, g: 0, b: 0 };
+        const c2 = { h: (h * 7) % 360, s: 60, l: 50, r: 0, g: 0, b: 0 };
+        const c3 = { h: (h * 13) % 360, s: 55, l: 48, r: 0, g: 0, b: 0 };
+        applyCoverThemeFromColors([c1, c2, c3]);
+      }
+    }
+
+    // Settings: theme + toggles
+    function applyTheme(name) {
+      if (THEMES.indexOf(name) === -1) name = 'aurora';
+      document.documentElement.setAttribute('data-theme', name);
+      localStorage.setItem('lgr-theme', name);
+      if (themeGrid) {
+        themeGrid.querySelectorAll('.theme-card').forEach(function(o) {
+          o.classList.toggle('active', o.dataset.theme === name);
+        });
+      }
+    }
+
+    function applyDisplayPrefs() {
+      eqEl.classList.toggle('hidden', !showEq);
+      cover.classList.toggle('hide-art', !showCover);
+      toggleEq.classList.toggle('on', showEq);
+      toggleEq.setAttribute('aria-pressed', showEq ? 'true' : 'false');
+      toggleCover.classList.toggle('on', showCover);
+      toggleCover.setAttribute('aria-pressed', showCover ? 'true' : 'false');
+      if (toggleColorPulse) {
+        toggleColorPulse.classList.toggle('on', colorPulseOn);
+        toggleColorPulse.setAttribute('aria-pressed', colorPulseOn ? 'true' : 'false');
+      }
+      if (!showEq && !colorPulseOn) stopVisualizer();
+      else if (!audio.paused) startVisualizer();
+      if (!colorPulseOn) resetColorPulse();
+    }
+
+    function loadPrefs() {
+      applyTheme(localStorage.getItem('lgr-theme') || 'aurora');
+      showEq = localStorage.getItem('lgr-show-eq') !== '0';
+      showCover = localStorage.getItem('lgr-show-cover') !== '0';
+      colorPulseOn = localStorage.getItem('lgr-color-pulse') === '1';
+      coverThemeOn = localStorage.getItem('lgr-cover-theme') === '1';
+      var savedScan = parseInt(localStorage.getItem('lgr-scan-interval') || '5', 10);
+      if (isNaN(savedScan) || savedScan < 0) savedScan = 5;
+      scanIntervalSec = savedScan;
+      shuffleOn = localStorage.getItem('lgr-shuffle') === '1';
+      repeatOn = localStorage.getItem('lgr-repeat') === '1';
+      var vol = parseFloat(localStorage.getItem('lgr-volume'));
+      if (!isNaN(vol) && vol >= 0 && vol <= 1) {
+        volume.value = vol;
+        audio.volume = vol;
+      }
+      if (toggleCoverTheme) {
+        toggleCoverTheme.classList.toggle('on', coverThemeOn);
+        toggleCoverTheme.setAttribute('aria-pressed', coverThemeOn ? 'true' : 'false');
+      }
+      applyDisplayPrefs();
+      if (coverThemeOn) refreshCoverTheme();
+    }
+
+    var savePosTimer = null;
+    function savePlaybackState() {
+      try {
+        if (currentIndex >= 0 && tracks[currentIndex]) {
+          localStorage.setItem('lgr-track-id', String(tracks[currentIndex].id));
+          localStorage.setItem('lgr-track-file', tracks[currentIndex].filename || '');
+          localStorage.setItem('lgr-position', String(audio.currentTime || 0));
+        }
+        localStorage.setItem('lgr-volume', String(audio.volume));
+        localStorage.setItem('lgr-shuffle', shuffleOn ? '1' : '0');
+        localStorage.setItem('lgr-repeat', repeatOn ? '1' : '0');
+        localStorage.setItem('lgr-was-playing', audio.paused ? '0' : '1');
+      } catch (e) {}
+    }
+    function scheduleSavePosition() {
+      if (savePosTimer) return;
+      savePosTimer = setTimeout(function() {
+        savePosTimer = null;
+        savePlaybackState();
+      }, 1500);
+    }
+    function restorePlaybackState() {
+      if (!tracks.length) return;
+      var file = localStorage.getItem('lgr-track-file') || '';
+      var idStr = localStorage.getItem('lgr-track-id');
+      var pos = parseFloat(localStorage.getItem('lgr-position') || '0');
+      var idx = -1;
+      if (file) {
+        for (var i = 0; i < tracks.length; i++) {
+          if (tracks[i].filename === file) { idx = i; break; }
+        }
+      }
+      if (idx < 0 && idStr) {
+        var id = parseInt(idStr, 10);
+        for (var j = 0; j < tracks.length; j++) {
+          if (tracks[j].id === id) { idx = j; break; }
+        }
+      }
+      if (idx < 0) idx = 0;
+      loadTrack(idx, false);
+      function seekWhenReady() {
+        if (!isFinite(pos) || pos <= 0) return;
+        if (audio.duration && pos < audio.duration - 1) {
+          audio.currentTime = pos;
+        } else if (!audio.duration) {
+          audio.addEventListener('loadedmetadata', function onMeta() {
+            audio.removeEventListener('loadedmetadata', onMeta);
+            if (isFinite(audio.duration) && pos < audio.duration - 1) {
+              audio.currentTime = pos;
+            }
+          });
+        }
+      }
+      seekWhenReady();
+      // autoplay may be blocked — try only if user had been playing
+      if (localStorage.getItem('lgr-was-playing') === '1') {
+        initAudioContext();
+        audio.play().then(function() { setPlaying(true); }).catch(function() {
+          setPlaying(false);
+          showStatus('Нажмите Play, чтобы продолжить');
+        });
+      }
+    }
+
+    function openSettings() {
+      settingsOverlay.classList.add('open');
+    }
+    function closeSettings() {
+      settingsOverlay.classList.remove('open');
+    }
+
+    settingsBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openSettings();
+    });
+    settingsClose.addEventListener('click', closeSettings);
+    settingsOverlay.addEventListener('click', function(e) {
+      if (e.target === settingsOverlay) closeSettings();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Escape') closeSettings();
+    });
+
+    themeGrid.addEventListener('click', function(e) {
+      const btn = e.target.closest('.theme-card');
+      if (btn) {
+        coverThemeOn = false;
+        localStorage.setItem('lgr-cover-theme', '0');
+        if (toggleCoverTheme) {
+          toggleCoverTheme.classList.remove('on');
+          toggleCoverTheme.setAttribute('aria-pressed', 'false');
+        }
+        clearCoverThemeVars();
+        applyTheme(btn.dataset.theme);
+        showStatus('Тема: ' + btn.dataset.theme.charAt(0).toUpperCase() + btn.dataset.theme.slice(1));
+      }
+    });
+
+    toggleEq.addEventListener('click', function() {
+      showEq = !showEq;
+      localStorage.setItem('lgr-show-eq', showEq ? '1' : '0');
+      applyDisplayPrefs();
+      showStatus(showEq ? 'Эквалайзер: показан' : 'Эквалайзер: скрыт');
+    });
+    toggleCover.addEventListener('click', function() {
+      showCover = !showCover;
+      localStorage.setItem('lgr-show-cover', showCover ? '1' : '0');
+      applyDisplayPrefs();
+      showStatus(showCover ? 'Обложка: показана' : 'Обложка: скрыта');
+    });
+    if (toggleColorPulse) {
+      toggleColorPulse.addEventListener('click', function() {
+        colorPulseOn = !colorPulseOn;
+        localStorage.setItem('lgr-color-pulse', colorPulseOn ? '1' : '0');
+        applyDisplayPrefs();
+        if (colorPulseOn && !audio.paused) startVisualizer();
+        showStatus(colorPulseOn ? 'Перелив цветов в ритме: вкл' : 'Перелив цветов в ритме: выкл');
+      });
+    }
+    if (toggleCoverTheme) {
+      toggleCoverTheme.addEventListener('click', function() {
+        coverThemeOn = !coverThemeOn;
+        localStorage.setItem('lgr-cover-theme', coverThemeOn ? '1' : '0');
+        toggleCoverTheme.classList.toggle('on', coverThemeOn);
+        toggleCoverTheme.setAttribute('aria-pressed', coverThemeOn ? 'true' : 'false');
+        refreshCoverTheme();
+        showStatus(coverThemeOn ? 'Тема под обложку: вкл' : 'Тема под обложку: выкл');
+      });
+    }
+    (function() {
+      var scanSel = document.getElementById('scanIntervalSelect');
+      if (!scanSel) return;
+      scanSel.addEventListener('change', function() {
+        applyScanInterval(scanSel.value, true);
+        var labels = { '5': '5 секунд', '30': '30 секунд', '60': '1 минута', '900': '15 минут', '3600': '1 час', '0': 'отключено' };
+        showStatus('Сканирование: ' + (labels[scanSel.value] || scanSel.value));
+      });
+    })();
+
+    // Shuffle / Repeat
+    function updateToggleUI() {
+      shuffleBtn.classList.toggle('active', shuffleOn);
+      repeatBtn.classList.toggle('active', repeatOn);
+    }
+    shuffleBtn.addEventListener('click', function() {
+      shuffleOn = !shuffleOn; updateToggleUI();
+      localStorage.setItem('lgr-shuffle', shuffleOn ? '1' : '0');
+      showStatus(shuffleOn ? 'Случайный порядок: вкл' : 'Случайный порядок: выкл');
+    });
+    repeatBtn.addEventListener('click', function() {
+      repeatOn = !repeatOn; updateToggleUI();
+      localStorage.setItem('lgr-repeat', repeatOn ? '1' : '0');
+      showStatus(repeatOn ? 'Повтор 1 трека: вкл' : 'Повтор 1 трека: выкл');
+    });
+
+    // Timer
+    function clearTimer() {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      timerMinutes = 0; timerEnd = 0; timerLabel.textContent = '';
+      timerBtn.classList.remove('active');
+    }
+    function startTimer(mins) {
+      clearTimer();
+      if (mins <= 0) return;
+      timerMinutes = mins;
+      timerEnd = Date.now() + mins * 60 * 1000;
+      timerBtn.classList.add('active');
+      updateTimerLabel();
+      timerInterval = setInterval(function() {
+        const left = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+        if (left <= 0) {
+          audio.pause(); setPlaying(false); clearTimer();
+          showStatus('Таймер: воспроизведение остановлено', 3500);
+          return;
+        }
+        updateTimerLabel();
+      }, 1000);
+    }
+    function updateTimerLabel() {
+      if (!timerEnd) { timerLabel.textContent = ''; return; }
+      const left = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+      timerLabel.textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+    }
+    timerBtn.addEventListener('click', function() {
+      let idx = TIMER_OPTIONS.indexOf(timerMinutes);
+      idx = (idx + 1) % TIMER_OPTIONS.length;
+      const next = TIMER_OPTIONS[idx];
+      if (next === 0) { clearTimer(); showStatus('Таймер выключен'); }
+      else { startTimer(next); showStatus('Таймер: ' + next + ' мин'); }
+    });
+
+    // Cover art
+    function setCover(track) {
+      if (track && track.hasCover && track.coverUrl) {
+        coverImg.onload = function() {
+          coverImg.classList.add('visible');
+          if (coverThemeOn) refreshCoverTheme();
+        };
+        coverImg.src = track.coverUrl;
+        if (coverImg.complete) {
+          coverImg.classList.add('visible');
+          if (coverThemeOn) refreshCoverTheme();
+        }
+        cover.classList.add('has-art');
+        cover.style.background = '#111';
+      } else {
+        coverImg.onload = null;
+        coverImg.classList.remove('visible');
+        coverImg.removeAttribute('src');
+        cover.classList.remove('has-art');
+        if (track) {
+          const h = hashStr(track.title + (track.artist || ''));
+          const hue1 = h % 360, hue2 = (h * 7) % 360;
+          cover.style.background = 'linear-gradient(145deg, hsl(' + hue1 + ' 70% 45% / 0.55), hsl(' + hue2 + ' 65% 40% / 0.55))';
+        }
+        if (coverThemeOn) refreshCoverTheme();
+      }
+    }
+
+    // Playback
+    function loadTrack(index, autoplay) {
+      if (typeof autoplay === 'undefined') autoplay = true;
+      if (index < 0 || index >= tracks.length) return;
+      currentIndex = index;
+      const t = tracks[index];
+      audio.src = t.url;
+      titleEl.textContent = t.title;
+      subtitleEl.textContent = t.artist || ('Трек ' + (index + 1) + ' из ' + tracks.length);
+      setCover(t);
+      document.querySelectorAll('.track-item').forEach(function(el, i) {
+        el.classList.toggle('active', i === index);
+      });
+      const active = document.querySelector('.track-item.active');
+      if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (autoplay) {
+        initAudioContext();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        audio.play().then(function() { setPlaying(true); })
+          .catch(function(err) { console.warn(err); setPlaying(false); showStatus('Не удалось воспроизвести'); });
+      }
+      savePlaybackState();
+    }
+    function getNextIndex() {
+      if (tracks.length === 0) return -1;
+      if (shuffleOn) {
+        if (tracks.length === 1) return 0;
+        let n; do { n = Math.floor(Math.random() * tracks.length); } while (n === currentIndex);
+        return n;
+      }
+      return (currentIndex + 1) % tracks.length;
+    }
+    function getPrevIndex() {
+      if (tracks.length === 0) return -1;
+      if (shuffleOn) {
+        if (tracks.length === 1) return 0;
+        let p; do { p = Math.floor(Math.random() * tracks.length); } while (p === currentIndex);
+        return p;
+      }
+      return (currentIndex - 1 + tracks.length) % tracks.length;
+    }
+    function playNext() {
+      if (tracks.length === 0) return;
+      if (repeatOn) {
+        audio.currentTime = 0;
+        audio.play().then(function() { setPlaying(true); });
+        return;
+      }
+      loadTrack(getNextIndex());
+    }
+    function playPrev() {
+      if (tracks.length === 0) return;
+      if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+      loadTrack(getPrevIndex());
+    }
+    function togglePlay() {
+      if (tracks.length === 0) { showStatus('Нет треков в каталоге'); return; }
+      if (currentIndex < 0) { loadTrack(0); return; }
+      if (audio.paused) {
+        initAudioContext();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        audio.play().then(function() { setPlaying(true); })
+          .catch(function() { showStatus('Ошибка воспроизведения'); });
+      } else {
+        audio.pause();
+        setPlaying(false);
+      }
+    }
+
+    playBtn.addEventListener('click', togglePlay);
+    prevBtn.addEventListener('click', playPrev);
+    nextBtn.addEventListener('click', playNext);
+    audio.addEventListener('timeupdate', function() {
+      if (isSeeking || !audio.duration) return;
+      progress.value = (audio.currentTime / audio.duration) * 1000;
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+      scheduleSavePosition();
+    });
+    audio.addEventListener('loadedmetadata', function() {
+      durationEl.textContent = formatTime(audio.duration);
+    });
+    audio.addEventListener('ended', playNext);
+    audio.addEventListener('play', function() { setPlaying(true); savePlaybackState(); });
+    audio.addEventListener('pause', function() { setPlaying(false); savePlaybackState(); });
+    window.addEventListener('pagehide', savePlaybackState);
+    window.addEventListener('beforeunload', savePlaybackState);
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') savePlaybackState();
+    });
+    progress.addEventListener('input', function() {
+      isSeeking = true;
+      if (audio.duration) currentTimeEl.textContent = formatTime((progress.value / 1000) * audio.duration);
+    });
+    progress.addEventListener('change', function() {
+      if (audio.duration) audio.currentTime = (progress.value / 1000) * audio.duration;
+      isSeeking = false;
+      savePlaybackState();
+    });
+    volume.addEventListener('input', function() {
+      audio.volume = parseFloat(volume.value);
+      localStorage.setItem('lgr-volume', String(audio.volume));
+    });
+    audio.volume = parseFloat(volume.value);
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+      if (e.code === 'ArrowRight') playNext();
+      if (e.code === 'ArrowLeft') playPrev();
+    });
+
+    
+    // Playlist collapse
+    function setPlaylistCollapsed(collapsed) {
+      appEl.classList.toggle('playlist-collapsed', collapsed);
+      showPlaylistBtn.classList.toggle('visible', collapsed);
+      localStorage.setItem('lgr-playlist-collapsed', collapsed ? '1' : '0');
+    }
+    function initPlaylistCollapse() {
+      setPlaylistCollapsed(localStorage.getItem('lgr-playlist-collapsed') === '1');
+    }
+    if (playlistToggle) {
+      playlistToggle.addEventListener('click', function() {
+        setPlaylistCollapsed(true);
+        showStatus('Плейлист свёрнут');
+      });
+    }
+    if (showPlaylistBtn) {
+      showPlaylistBtn.addEventListener('click', function() {
+        setPlaylistCollapsed(false);
+        showStatus('Плейлист открыт');
+      });
+    }
+
+
+    function tracksFingerprint(list) {
+      return (list || []).map(function(t) { return t.filename + ':' + t.id; }).join('|');
+    }
+
+    function renderPlaylist() {
+      if (!tracks.length) {
+        trackList.innerHTML = '<li class="empty"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg><p>Каталог пуст</p><p>Положите аудиофайлы<br>в папку <code>./music</code></p></li>';
+        trackCount.textContent = '0';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < tracks.length; i++) {
+        var t = tracks[i];
+        var thumb = t.hasCover
+          ? '<img class="track-thumb" src="' + t.coverUrl + '" alt="" loading="lazy" />'
+          : '<div class="track-thumb"></div>';
+        html += '<li class="track-item" data-index="' + i + '">' + thumb +
+          '<div class="track-info-col">' +
+          '<span class="track-title">' + escapeHtml(t.title) + '</span>' +
+          '<span class="track-artist">' + escapeHtml(t.artist || '') + '</span></div>' +
+          '<span class="playing-indicator"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></span></li>';
+      }
+      trackList.innerHTML = html;
+      trackCount.textContent = String(tracks.length);
+      document.querySelectorAll('.track-item').forEach(function(el) {
+        el.addEventListener('click', function() {
+          loadTrack(parseInt(this.dataset.index, 10));
+        });
+      });
+      if (currentIndex >= 0) {
+        document.querySelectorAll('.track-item').forEach(function(el, i) {
+          el.classList.toggle('active', i === currentIndex);
+        });
+      }
+    }
+
+    var lastTracksFp = '';
+    var catalogPollTimer = null;
+
+    async function refreshCatalog(silent) {
+      try {
+        var res = await fetch('/api/tracks', { cache: 'no-store' });
+        if (!res.ok) return;
+        var list = await res.json();
+        if (!Array.isArray(list)) return;
+        var fp = tracksFingerprint(list);
+        if (fp === lastTracksFp) return;
+
+        var prevLen = tracks.length;
+        var prevFile = (currentIndex >= 0 && tracks[currentIndex]) ? tracks[currentIndex].filename : '';
+
+        tracks = list;
+        lastTracksFp = fp;
+        renderPlaylist();
+
+        var newIdx = -1;
+        if (prevFile) {
+          for (var i = 0; i < tracks.length; i++) {
+            if (tracks[i].filename === prevFile) { newIdx = i; break; }
+          }
+        }
+
+        if (newIdx >= 0) {
+          currentIndex = newIdx;
+          document.querySelectorAll('.track-item').forEach(function(el, i) {
+            el.classList.toggle('active', i === currentIndex);
+          });
+        } else if (prevFile && tracks.length) {
+          // текущий файл удалили
+          var next = Math.min(Math.max(currentIndex, 0), tracks.length - 1);
+          if (!audio.paused) loadTrack(next, true);
+          else currentIndex = -1;
+        } else if (!tracks.length) {
+          currentIndex = -1;
+          audio.pause();
+          setPlaying(false);
+          titleEl.textContent = 'Liquid Glass Radio';
+          subtitleEl.textContent = 'Каталог пуст';
+        }
+
+        var delta = tracks.length - prevLen;
+        if (!silent) {
+          if (delta > 0) showStatus('Добавлено треков: +' + delta);
+          else if (delta < 0) showStatus('Удалено треков: ' + (-delta));
+          else showStatus('Плейлист обновлён');
+        }
+      } catch (e) {
+        console.warn('catalog poll', e);
+      }
+    }
+
+    var scanIntervalSec = 5; // 0 = disabled
+
+    function getScanIntervalMs() {
+      if (!scanIntervalSec || scanIntervalSec <= 0) return 0;
+      return scanIntervalSec * 1000;
+    }
+
+    function startCatalogPolling() {
+      if (catalogPollTimer) {
+        clearInterval(catalogPollTimer);
+        catalogPollTimer = null;
+      }
+      var ms = getScanIntervalMs();
+      if (!ms) return;
+      catalogPollTimer = setInterval(function() { refreshCatalog(false); }, ms);
+    }
+
+    function applyScanInterval(sec, restart) {
+      scanIntervalSec = parseInt(sec, 10);
+      if (isNaN(scanIntervalSec) || scanIntervalSec < 0) scanIntervalSec = 5;
+      localStorage.setItem('lgr-scan-interval', String(scanIntervalSec));
+      var sel = document.getElementById('scanIntervalSelect');
+      if (sel) sel.value = String(scanIntervalSec);
+      if (restart !== false) startCatalogPolling();
+    }
+
+    async function init() {
+      loadPrefs();
+      applyScanInterval(scanIntervalSec, false);
+      updateToggleUI();
+      initPlaylistCollapse();
+      try {
+        const res = await fetch('/api/tracks');
+        tracks = await res.json();
+        lastTracksFp = tracksFingerprint(tracks);
+        renderPlaylist();
+        startCatalogPolling();
+        if (tracks.length === 0) {
+          return;
+        }
+        restorePlaybackState();
+        showStatus('Загружено треков: ' + tracks.length);
+      } catch (err) {
+        console.error(err);
+        showStatus('Ошибка загрузки каталога');
+      }
+    }
+    init();
+  </script>
+</body>
+</html>
