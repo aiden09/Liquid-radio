@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
   <style>
     :root, [data-theme="aurora"] {
       --bg: #050510; --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
@@ -44,6 +45,13 @@
       --orb1: linear-gradient(135deg,#a855f7,#7c3aed); --orb2: linear-gradient(135deg,#c026d3,#9333ea);
       --orb3: linear-gradient(135deg,#8b5cf6,#6d28d9); --bg-grad1: #1a0a2e; --bg-grad2: #12081e; --bg-grad3: #0c0614;
     }
+    [data-theme="synthwave"] {
+      --bg: #0a0118; --glass: rgba(255,60,180,0.07); --glass-border: rgba(255,80,200,0.18);
+      --glass-highlight: rgba(0,255,255,0.22); --text: #ffe8ff; --text-dim: rgba(255,180,255,0.55);
+      --accent: #ff2d95; --accent2: #00f0ff; --accent3: #b026ff;
+      --orb1: linear-gradient(135deg,#ff2d95,#7b2ff7); --orb2: linear-gradient(135deg,#00f0ff,#ff2d95);
+      --orb3: linear-gradient(135deg,#b026ff,#00c2ff); --bg-grad1: #1a0530; --bg-grad2: #0d0221; --bg-grad3: #12001a;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif;
@@ -58,14 +66,6 @@
                   radial-gradient(ellipse at 50% 50%, var(--bg-grad3) 0%, var(--bg) 70%);
       transition: background 0.8s ease;
     }
-    .orb {
-      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55;
-      animation: float 18s ease-in-out infinite; will-change: transform;
-      transition: background 0.8s ease, opacity 0.5s;
-    }
-    .orb1 { width: 55vw; height: 55vw; background: var(--orb1); top: -15%; left: -10%; }
-    .orb2 { width: 45vw; height: 45vw; background: var(--orb2); bottom: -20%; right: -10%; animation-delay: -6s; animation-duration: 22s; }
-    .orb3 { width: 35vw; height: 35vw; background: var(--orb3); top: 40%; left: 50%; animation-delay: -12s; animation-duration: 26s; }
     .bg-pulse-layer {
       position: absolute; inset: -20%;
       pointer-events: none; opacity: 0;
@@ -79,14 +79,6 @@
       will-change: transform, filter, opacity;
     }
     .bg.pulse-active .bg-pulse-layer { opacity: 1; }
-    .bg.pulse-active .orb {
-      transition: filter 0.06s linear, transform 0.06s linear, opacity 0.06s linear;
-    }
-    @keyframes float {
-      0%, 100% { transform: translate(0,0) scale(1); }
-      33% { transform: translate(4%,-6%) scale(1.05); }
-      66% { transform: translate(-5%,4%) scale(0.97); }
-    }
     .app {
       position: relative; z-index: 1; height: 100%; display: grid;
       grid-template-columns: 1fr 300px; gap: 16px; padding: 16px;
@@ -356,6 +348,7 @@
     .theme-dot.sunset { background: linear-gradient(135deg, #fb923c, #f472b6); }
     .theme-dot.emerald { background: linear-gradient(135deg, #34d399, #2dd4bf); }
     .theme-dot.amethyst { background: linear-gradient(135deg, #c084fc, #a78bfa); }
+    .theme-dot.synthwave { background: linear-gradient(135deg, #ff2d95, #00f0ff); }
   
     /* Settings panel */
     .settings-overlay {
@@ -570,15 +563,144 @@
       .show-playlist-btn:hover { transform: scale(1.06); }
     }
 
+    /* Chromecast button — top right */
+    .cast-btn {
+      position: fixed; top: 16px; right: 16px; z-index: 40;
+      width: 44px; height: 44px; border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      transition: all 0.2s;
+    }
+    .cast-btn:hover {
+      background: color-mix(in srgb, var(--accent) 20%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+      color: var(--accent);
+      transform: scale(1.06);
+    }
+    .cast-btn.active {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+    }
+    .cast-btn svg { width: 22px; height: 22px; fill: currentColor; }
+    @media (max-width: 900px) {
+      .cast-btn { top: 10px; right: 10px; width: 40px; height: 40px; }
+      .cast-btn svg { width: 20px; height: 20px; }
+    }
+
+    /* Audio EQ panel */
+    .eq-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.25s ease;
+    }
+    .eq-overlay.open { display: flex; opacity: 1; }
+    .eq-panel {
+      width: min(380px, 94vw); max-height: 88vh; overflow-y: auto;
+      padding: 24px; border-radius: 24px;
+      background: var(--glass);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 0 var(--glass-highlight);
+      animation: panelIn 0.28s ease;
+    }
+    .eq-presets {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+      margin-bottom: 18px;
+    }
+    .eq-preset {
+      padding: 10px 8px; border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.04); color: var(--text);
+      font-family: inherit; font-size: 0.8rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .eq-preset:hover { background: rgba(255,255,255,0.09); }
+    .eq-preset.active {
+      border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      color: var(--accent);
+    }
+    .eq-bands {
+      display: flex; justify-content: space-between; gap: 4px;
+      padding: 4px 0 8px; margin-bottom: 8px;
+      min-height: 160px;
+    }
+    .eq-band {
+      display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px;
+      position: relative;
+    }
+    .eq-band label {
+      font-size: 0.68rem; color: var(--text-dim); font-weight: 500;
+      letter-spacing: 0.02em; order: 3;
+    }
+    .eq-band .gain-val {
+      font-size: 0.65rem; color: var(--accent); font-weight: 600;
+      min-height: 14px; order: 1;
+    }
+    .eq-band .slider-wrap {
+      height: 110px; width: 28px; display: flex; align-items: center; justify-content: center;
+      order: 2;
+    }
+    .eq-slider {
+      -webkit-appearance: none; appearance: none;
+      width: 110px; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.12);
+      outline: none; cursor: pointer;
+      transform: rotate(-90deg);
+    }
+    .eq-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4); cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .eq-slider::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4); cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .eq-actions {
+      display: flex; gap: 8px; margin-top: 8px;
+    }
+    .eq-actions button {
+      flex: 1; padding: 10px; border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.06); color: var(--text);
+      font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .eq-actions button:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--glass-highlight);
+    }
+    .eq-actions button.primary {
+      background: color-mix(in srgb, var(--accent) 25%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+      color: var(--accent);
+    }
+    .eq-actions button.primary:hover {
+      background: color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
   </style>
 </head>
 <body>
   <div class="bg">
     <div class="bg-pulse-layer" id="bgPulseLayer"></div>
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
   </div>
+  <button class="cast-btn" id="castBtn" title="Chromecast">
+    <svg viewBox="0 0 24 24"><path d="M1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2c4.97 0 9 4.03 9 9h2c0-6.08-4.93-11-11-11zm20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+  </button>
   <div class="app">
     <div class="player glass">
       <div class="cover-wrap">
@@ -625,6 +747,9 @@
           <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
           <span class="timer-label" id="timerLabel"></span>
         </button>
+        <button class="btn btn-sm" id="eqBtn" title="Эквалайзер">
+          <svg viewBox="0 0 24 24"><path d="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z"/></svg>
+        </button>
         <button class="btn btn-sm" id="settingsBtn" title="Настройки">
           <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
         </button>
@@ -666,6 +791,7 @@
           <button class="theme-card" data-theme="sunset"><span class="theme-dot sunset"></span> Sunset</button>
           <button class="theme-card" data-theme="emerald"><span class="theme-dot emerald"></span> Emerald</button>
           <button class="theme-card" data-theme="amethyst"><span class="theme-dot amethyst"></span> Amethyst</button>
+          <button class="theme-card" data-theme="synthwave"><span class="theme-dot synthwave"></span> Synthwave</button>
         </div>
         <div class="toggle-row" style="margin-top:12px;">
           <span>Тема под обложку</span>
@@ -700,6 +826,79 @@
           <option value="3600">1 час</option>
           <option value="0">Отключить сканирование</option>
         </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="eq-overlay" id="eqOverlay">
+    <div class="eq-panel glass" id="eqPanel">
+      <div class="settings-header">
+        <h3>Эквалайзер</h3>
+        <button class="settings-close" id="eqClose" title="Закрыть">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">Предустановки</div>
+        <div class="eq-presets" id="eqPresets">
+          <button class="eq-preset active" data-preset="flat">Равный</button>
+          <button class="eq-preset" data-preset="bass">Басы</button>
+          <button class="eq-preset" data-preset="treble">Высокие</button>
+          <button class="eq-preset" data-preset="vocal">Вокал</button>
+          <button class="eq-preset" data-preset="rock">Рок</button>
+          <button class="eq-preset" data-preset="electronic">Электро</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">Полосы частот (дБ)</div>
+        <div class="eq-bands" id="eqBands">
+          <div class="eq-band">
+            <span class="gain-val" data-i="0">0</span>
+            <div class="slider-wrap">
+              <input type="range" class="eq-slider" data-i="0" min="-12" max="12" step="0.5" value="0" />
+            </div>
+            <label>60</label>
+          </div>
+          <div class="eq-band">
+            <span class="gain-val" data-i="1">0</span>
+            <div class="slider-wrap">
+              <input type="range" class="eq-slider" data-i="1" min="-12" max="12" step="0.5" value="0" />
+            </div>
+            <label>150</label>
+          </div>
+          <div class="eq-band">
+            <span class="gain-val" data-i="2">0</span>
+            <div class="slider-wrap">
+              <input type="range" class="eq-slider" data-i="2" min="-12" max="12" step="0.5" value="0" />
+            </div>
+            <label>400</label>
+          </div>
+          <div class="eq-band">
+            <span class="gain-val" data-i="3">0</span>
+            <div class="slider-wrap">
+              <input type="range" class="eq-slider" data-i="3" min="-12" max="12" step="0.5" value="0" />
+            </div>
+            <label>1k</label>
+          </div>
+          <div class="eq-band">
+            <span class="gain-val" data-i="4">0</span>
+            <div class="slider-wrap">
+              <input type="range" class="eq-slider" data-i="4" min="-12" max="12" step="0.5" value="0" />
+            </div>
+            <label>2.4k</label>
+          </div>
+          <div class="eq-band">
+            <span class="gain-val" data-i="5">0</span>
+            <div class="slider-wrap">
+              <input type="range" class="eq-slider" data-i="5" min="-12" max="12" step="0.5" value="0" />
+            </div>
+            <label>6k</label>
+          </div>
+        </div>
+        <div class="eq-actions">
+          <button type="button" id="eqReset">Сброс</button>
+          <button type="button" class="primary" id="eqApply">Применить</button>
+        </div>
       </div>
     </div>
   </div>
@@ -743,19 +942,36 @@
     const toggleCover = document.getElementById('toggleCover');
     const toggleColorPulse = document.getElementById('toggleColorPulse');
     const toggleCoverTheme = document.getElementById('toggleCoverTheme');
+    const eqBtn = document.getElementById('eqBtn');
+    const eqOverlay = document.getElementById('eqOverlay');
+    const eqClose = document.getElementById('eqClose');
+    const castBtn = document.getElementById('castBtn');
 
     let tracks = [], currentIndex = -1, isSeeking = false;
     let shuffleOn = false, repeatOn = false;
     let timerMinutes = 0, timerEnd = 0, timerInterval = null;
     let showEq = true, showCover = true, coverThemeOn = false, colorPulseOn = false;
 
-    // Web Audio API for real-time equalizer
+    // Web Audio API for real-time equalizer + audio EQ
     let audioCtx = null, analyser = null, sourceNode = null, freqData = null;
     let animId = null, isVisualizing = false;
+    let eqFilters = [];
+    let eqGains = [0, 0, 0, 0, 0, 0];
+    let currentEqPreset = 'flat';
+
+    const EQ_FREQS = [60, 150, 400, 1000, 2400, 6000];
+    const EQ_PRESETS = {
+      flat:       [0, 0, 0, 0, 0, 0],
+      bass:       [8, 5, 2, 0, -1, -2],
+      treble:     [-2, -1, 0, 2, 5, 8],
+      vocal:      [-3, -1, 3, 5, 3, 0],
+      rock:       [5, 3, -1, 2, 4, 3],
+      electronic: [6, 4, 0, -2, 3, 5]
+    };
 
     const playSvg = '<path d="M8 5v14l11-7z"/>';
     const pauseSvg = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    const THEMES = ['aurora','ocean','sunset','emerald','amethyst'];
+    const THEMES = ['aurora','ocean','sunset','emerald','amethyst','synthwave'];
     const TIMER_OPTIONS = [0, 15, 30, 45, 60];
     const BAR_COUNT = eqBars.length;
 
@@ -791,7 +1007,7 @@
       return Math.abs(h);
     }
 
-    // ===== Real-time audio visualizer =====
+    // ===== Real-time audio visualizer + multi-band EQ =====
     function initAudioContext() {
       if (audioCtx) return;
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -800,8 +1016,75 @@
       analyser.smoothingTimeConstant = 0.72;
       freqData = new Uint8Array(analyser.frequencyBinCount);
       sourceNode = audioCtx.createMediaElementSource(audio);
-      sourceNode.connect(analyser);
+
+      // 6-band peaking EQ chain: source → filters → analyser → destination
+      eqFilters = EQ_FREQS.map(function(freq) {
+        var f = audioCtx.createBiquadFilter();
+        f.type = 'peaking';
+        f.frequency.value = freq;
+        f.Q.value = 1.2;
+        f.gain.value = 0;
+        return f;
+      });
+      var prev = sourceNode;
+      for (var i = 0; i < eqFilters.length; i++) {
+        prev.connect(eqFilters[i]);
+        prev = eqFilters[i];
+      }
+      prev.connect(analyser);
       analyser.connect(audioCtx.destination);
+
+      // restore saved gains
+      applyEqGains(eqGains);
+    }
+    function applyEqGains(gains) {
+      eqGains = gains.slice();
+      if (eqFilters.length) {
+        for (var i = 0; i < eqFilters.length; i++) {
+          eqFilters[i].gain.value = eqGains[i];
+        }
+      }
+      updateEqSlidersUI();
+    }
+    function updateEqSlidersUI() {
+      var sliders = document.querySelectorAll('.eq-slider');
+      var vals = document.querySelectorAll('.gain-val');
+      for (var i = 0; i < sliders.length; i++) {
+        sliders[i].value = eqGains[i];
+        if (vals[i]) {
+          var g = eqGains[i];
+          vals[i].textContent = (g > 0 ? '+' : '') + g;
+        }
+      }
+      // highlight active preset or none
+      var presetBtns = document.querySelectorAll('.eq-preset');
+      var matched = null;
+      for (var p in EQ_PRESETS) {
+        if (EQ_PRESETS[p].every(function(v, idx) { return Math.abs(v - eqGains[idx]) < 0.01; })) {
+          matched = p;
+          break;
+        }
+      }
+      currentEqPreset = matched || 'custom';
+      presetBtns.forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.preset === currentEqPreset);
+      });
+    }
+    function saveEqState() {
+      localStorage.setItem('lgr-eq-gains', JSON.stringify(eqGains));
+      localStorage.setItem('lgr-eq-preset', currentEqPreset);
+    }
+    function loadEqState() {
+      try {
+        var saved = localStorage.getItem('lgr-eq-gains');
+        if (saved) {
+          var arr = JSON.parse(saved);
+          if (Array.isArray(arr) && arr.length === 6) {
+            eqGains = arr.map(function(v) { return Math.max(-12, Math.min(12, Number(v) || 0)); });
+          }
+        }
+        currentEqPreset = localStorage.getItem('lgr-eq-preset') || 'flat';
+      } catch (e) {}
     }
     function needsVisualizer() {
       return (showEq || colorPulseOn) && !audio.paused;
@@ -836,11 +1119,6 @@
         layer.style.removeProperty('opacity');
         layer.style.removeProperty('background');
       }
-      document.querySelectorAll('.orb').forEach(function(o) {
-        o.style.removeProperty('filter');
-        o.style.removeProperty('transform');
-        o.style.removeProperty('opacity');
-      });
       document.querySelectorAll('.glass').forEach(function(g) {
         g.style.removeProperty('box-shadow');
       });
@@ -907,24 +1185,6 @@
           layer.style.filter = 'saturate(' + (1.2 + e * 0.8).toFixed(2) + ') brightness(' + (0.95 + e * 0.35).toFixed(2) + ')';
           layer.style.opacity = String(0.55 + e * 0.45);
           layer.style.transform = 'scale(' + (1 + e * 0.08).toFixed(3) + ') rotate(' + (e * 3).toFixed(1) + 'deg)';
-        }
-
-        // Each orb reacts to a different band with different hue shift
-        var orbs = document.querySelectorAll('.orb');
-        if (orbs[0]) {
-          orbs[0].style.filter = 'hue-rotate(' + (b * 50).toFixed(0) + 'deg) saturate(' + (1 + b * 0.9).toFixed(2) + ') brightness(' + (0.9 + b * 0.5).toFixed(2) + ')';
-          orbs[0].style.transform = 'scale(' + (1 + b * 0.15).toFixed(3) + ') translate(' + (b * 2).toFixed(1) + '%, ' + (-b * 2).toFixed(1) + '%)';
-          orbs[0].style.opacity = String(0.7 + b * 0.3);
-        }
-        if (orbs[1]) {
-          orbs[1].style.filter = 'hue-rotate(' + (80 + m * 70).toFixed(0) + 'deg) saturate(' + (1 + m * 0.85).toFixed(2) + ') brightness(' + (0.9 + m * 0.45).toFixed(2) + ')';
-          orbs[1].style.transform = 'scale(' + (1 + m * 0.18).toFixed(3) + ') translate(' + (-m * 3).toFixed(1) + '%, ' + (m * 2).toFixed(1) + '%)';
-          orbs[1].style.opacity = String(0.65 + m * 0.35);
-        }
-        if (orbs[2]) {
-          orbs[2].style.filter = 'hue-rotate(' + (180 + t * 90).toFixed(0) + 'deg) saturate(' + (1 + t * 0.9).toFixed(2) + ') brightness(' + (0.9 + t * 0.5).toFixed(2) + ')';
-          orbs[2].style.transform = 'scale(' + (1 + t * 0.2).toFixed(3) + ')';
-          orbs[2].style.opacity = String(0.6 + t * 0.4);
         }
 
         document.querySelectorAll('.glass').forEach(function(g) {
@@ -1109,6 +1369,7 @@
         toggleCoverTheme.classList.toggle('on', coverThemeOn);
         toggleCoverTheme.setAttribute('aria-pressed', coverThemeOn ? 'true' : 'false');
       }
+      loadEqState();
       applyDisplayPrefs();
       if (coverThemeOn) refreshCoverTheme();
     }
@@ -1193,8 +1454,416 @@
       if (e.target === settingsOverlay) closeSettings();
     });
     document.addEventListener('keydown', function(e) {
-      if (e.code === 'Escape') closeSettings();
+      if (e.code === 'Escape') {
+        closeSettings();
+        closeEqPanel();
+      }
     });
+
+    // ===== Audio EQ panel =====
+    function openEqPanel() {
+      initAudioContext();
+      updateEqSlidersUI();
+      eqOverlay.classList.add('open');
+    }
+    function closeEqPanel() {
+      eqOverlay.classList.remove('open');
+    }
+    eqBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openEqPanel();
+    });
+    eqClose.addEventListener('click', closeEqPanel);
+    eqOverlay.addEventListener('click', function(e) {
+      if (e.target === eqOverlay) closeEqPanel();
+    });
+
+    document.getElementById('eqPresets').addEventListener('click', function(e) {
+      var btn = e.target.closest('.eq-preset');
+      if (!btn) return;
+      var name = btn.dataset.preset;
+      if (!EQ_PRESETS[name]) return;
+      currentEqPreset = name;
+      applyEqGains(EQ_PRESETS[name]);
+      saveEqState();
+      var labels = { flat: 'Равный', bass: 'Басы', treble: 'Высокие', vocal: 'Вокал', rock: 'Рок', electronic: 'Электро' };
+      showStatus('Эквалайзер: ' + (labels[name] || name));
+    });
+
+    document.querySelectorAll('.eq-slider').forEach(function(slider) {
+      slider.addEventListener('input', function() {
+        var i = parseInt(slider.dataset.i, 10);
+        var val = parseFloat(slider.value);
+        eqGains[i] = val;
+        if (eqFilters[i]) eqFilters[i].gain.value = val;
+        var valEl = document.querySelector('.gain-val[data-i="' + i + '"]');
+        if (valEl) valEl.textContent = (val > 0 ? '+' : '') + val;
+        currentEqPreset = 'custom';
+        document.querySelectorAll('.eq-preset').forEach(function(b) { b.classList.remove('active'); });
+      });
+      slider.addEventListener('change', function() {
+        saveEqState();
+      });
+    });
+
+    document.getElementById('eqReset').addEventListener('click', function() {
+      currentEqPreset = 'flat';
+      applyEqGains(EQ_PRESETS.flat);
+      saveEqState();
+      showStatus('Эквалайзер сброшен');
+    });
+    document.getElementById('eqApply').addEventListener('click', function() {
+      applyEqGains(eqGains);
+      saveEqState();
+      closeEqPanel();
+      showStatus('Эквалайзер применён');
+    });
+
+    // ===== Chromecast (Google Cast Framework + Remote Playback fallback) =====
+    var castConnected = false;
+    var castSession = null;
+    var castPlayer = null;
+    var castAvailable = false;
+    var castFrameworkReady = false;
+
+    function updateCastUI() {
+      if (!castBtn) return;
+      castBtn.classList.toggle('active', castConnected);
+      castBtn.title = castConnected ? 'Chromecast: отключить' : 'Chromecast';
+    }
+
+    function absoluteUrl(path) {
+      if (!path) return '';
+      if (/^https?:\/\//i.test(path)) return path;
+      try {
+        return new URL(path, window.location.href).href;
+      } catch (e) {
+        return window.location.origin + (path.charAt(0) === '/' ? path : '/' + path);
+      }
+    }
+
+    function getCurrentTrackMeta() {
+      var t = (currentIndex >= 0 && tracks[currentIndex]) ? tracks[currentIndex] : null;
+      var contentUrl = absoluteUrl(audio.currentSrc || audio.src || (t && t.url) || '');
+      if (!contentUrl) return null;
+      var title = (t && t.title) || titleEl.textContent || 'Liquid Glass Radio';
+      var artist = (t && t.artist) || subtitleEl.textContent || '';
+      var imageUrl = '';
+      if (t && t.hasCover && t.coverUrl) imageUrl = absoluteUrl(t.coverUrl);
+      else if (coverImg && coverImg.src && coverImg.src.indexOf('data:') !== 0) imageUrl = coverImg.src;
+      return {
+        contentUrl: contentUrl,
+        title: title,
+        artist: artist,
+        imageUrl: imageUrl,
+        duration: (audio.duration && isFinite(audio.duration)) ? audio.duration : null,
+        currentTime: (audio.currentTime && isFinite(audio.currentTime)) ? audio.currentTime : 0
+      };
+    }
+
+    function loadMediaOnCast(autoplay) {
+      var meta = getCurrentTrackMeta();
+      if (!meta || !meta.contentUrl) {
+        return Promise.reject(new Error('no track'));
+      }
+
+      // Prefer Cast Framework session API
+      try {
+        if (window.cast && cast.framework) {
+          var context = cast.framework.CastContext.getInstance();
+          var session = context.getCurrentSession();
+          if (session) {
+            var mediaInfo = new chrome.cast.media.MediaInfo(meta.contentUrl, 'audio/mpeg');
+            mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED;
+            mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+            mediaInfo.metadata.metadataType = chrome.cast.media.MetadataType.MUSIC_TRACK;
+            mediaInfo.metadata.title = meta.title;
+            mediaInfo.metadata.artist = meta.artist;
+            mediaInfo.metadata.albumName = 'Liquid Glass Radio';
+            if (meta.imageUrl) {
+              mediaInfo.metadata.images = [new chrome.cast.Image(meta.imageUrl)];
+            }
+            if (meta.duration) mediaInfo.duration = meta.duration;
+
+            var request = new chrome.cast.media.LoadRequest(mediaInfo);
+            request.autoplay = autoplay !== false;
+            request.currentTime = meta.currentTime || 0;
+
+            return session.loadMedia(request).then(function() {
+              castPlayer = session.getMediaSession();
+              castConnected = true;
+              updateCastUI();
+              if (!audio.paused) {
+                audio.pause();
+                setPlaying(false);
+              }
+              showStatus('Chromecast: ' + meta.title);
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Framework loadMedia failed, trying legacy', e);
+      }
+
+      // Legacy chrome.cast session
+      if (!castSession || !chrome || !chrome.cast) {
+        return Promise.reject(new Error('no session'));
+      }
+      var mediaInfo2 = new chrome.cast.media.MediaInfo(meta.contentUrl, 'audio/mpeg');
+      mediaInfo2.streamType = chrome.cast.media.StreamType.BUFFERED;
+      mediaInfo2.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+      mediaInfo2.metadata.title = meta.title;
+      mediaInfo2.metadata.artist = meta.artist;
+      if (meta.imageUrl) mediaInfo2.metadata.images = [new chrome.cast.Image(meta.imageUrl)];
+      if (meta.duration) mediaInfo2.duration = meta.duration;
+      var request2 = new chrome.cast.media.LoadRequest(mediaInfo2);
+      request2.autoplay = autoplay !== false;
+      request2.currentTime = meta.currentTime || 0;
+      return new Promise(function(resolve, reject) {
+        castSession.loadMedia(request2, function(media) {
+          castPlayer = media;
+          castConnected = true;
+          updateCastUI();
+          if (!audio.paused) {
+            audio.pause();
+            setPlaying(false);
+          }
+          showStatus('Chromecast: ' + meta.title);
+          resolve(media);
+        }, function(err) {
+          console.warn('Cast loadMedia error', err);
+          reject(err);
+        });
+      });
+    }
+
+    function endCastSession() {
+      if (castSession) {
+        try {
+          castSession.stop(function() {}, function() {});
+        } catch (e) {}
+      }
+      castSession = null;
+      castPlayer = null;
+      castConnected = false;
+      updateCastUI();
+      showStatus('Chromecast: отключено');
+    }
+
+    function onCastSessionUpdate(isAlive) {
+      if (!isAlive) {
+        castSession = null;
+        castPlayer = null;
+        castConnected = false;
+        updateCastUI();
+        showStatus('Chromecast: отключено');
+      }
+    }
+
+    function initCastFramework() {
+      if (!window.chrome || !chrome.cast || !chrome.cast.isAvailable) return false;
+      try {
+        var context = cast.framework.CastContext.getInstance();
+        context.setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+        context.addEventListener(
+          cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+          function(event) {
+            var state = event.castState;
+            castAvailable = state !== cast.framework.CastState.NO_DEVICES_AVAILABLE;
+            if (state === cast.framework.CastState.CONNECTED) {
+              castConnected = true;
+              castSession = context.getCurrentSession()
+                ? context.getCurrentSession().getSessionObj()
+                : null;
+              // Prefer framework session media
+              try {
+                var s = context.getCurrentSession();
+                if (s) castPlayer = s.getMediaSession();
+              } catch (e) {}
+            } else if (state === cast.framework.CastState.NOT_CONNECTED) {
+              castConnected = false;
+              castSession = null;
+              castPlayer = null;
+            }
+            updateCastUI();
+          }
+        );
+        context.addEventListener(
+          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+          function(event) {
+            var st = event.sessionState;
+            if (st === cast.framework.SessionState.SESSION_STARTED ||
+                st === cast.framework.SessionState.SESSION_RESUMED) {
+              castConnected = true;
+              try {
+                var s = context.getCurrentSession();
+                castSession = s ? s.getSessionObj() : null;
+                if (s) castPlayer = s.getMediaSession();
+              } catch (e) {}
+              updateCastUI();
+            } else if (st === cast.framework.SessionState.SESSION_ENDED) {
+              castConnected = false;
+              castSession = null;
+              castPlayer = null;
+              updateCastUI();
+              showStatus('Chromecast: отключено');
+            }
+          }
+        );
+        castFrameworkReady = true;
+        return true;
+      } catch (e) {
+        console.warn('Cast framework init failed', e);
+        return false;
+      }
+    }
+
+    // Legacy callback when Cast API becomes available
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+      if (isAvailable) {
+        initCastFramework();
+      }
+    };
+    // Also try after a short delay (SDK may already be ready)
+    setTimeout(function() {
+      if (!castFrameworkReady && window.chrome && chrome.cast && chrome.cast.isAvailable) {
+        initCastFramework();
+      }
+    }, 1500);
+
+    async function castViaFramework() {
+      var context = cast.framework.CastContext.getInstance();
+      var session = context.getCurrentSession();
+
+      // Already casting → disconnect on button click
+      if (castConnected || session) {
+        try {
+          context.endCurrentSession(true);
+        } catch (e) {
+          console.warn('endCurrentSession', e);
+        }
+        try {
+          if (castSession && typeof castSession.stop === 'function') {
+            castSession.stop(function() {}, function() {});
+          }
+        } catch (e2) {}
+        endCastSession();
+        return;
+      }
+
+      showStatus('Chromecast: выбор устройства…');
+      await context.requestSession();
+      var s = context.getCurrentSession();
+      if (s) {
+        castSession = s.getSessionObj();
+        castConnected = true;
+        updateCastUI();
+        await loadMediaOnCast(true);
+      }
+    }
+
+    async function castViaRemotePlayback() {
+      if (!('remote' in HTMLMediaElement.prototype) || !audio.remote) {
+        throw new Error('Remote Playback не поддерживается');
+      }
+      // Already connected → disconnect
+      if (castConnected || audio.remote.state === 'connected') {
+        try {
+          if (typeof audio.remote.cancelWatchAvailability === 'function') {
+            // no direct stop; prompt again often opens UI to disconnect
+          }
+          // Remote Playback has no explicit disconnect in all browsers —
+          // calling prompt() again lets user stop, then force local state
+          await audio.remote.prompt();
+        } catch (e) {}
+        castConnected = audio.remote.state === 'connected';
+        if (!castConnected) {
+          endCastSession();
+        } else {
+          updateCastUI();
+          showStatus('Chromecast: всё ещё подключено — отключите в меню устройства');
+        }
+        return;
+      }
+      if (typeof audio.remote.watchAvailability === 'function') {
+        await new Promise(function(resolve) {
+          var done = false;
+          try {
+            audio.remote.watchAvailability(function(available) {
+              if (!done) { done = true; resolve(available); }
+            });
+          } catch (e) { if (!done) { done = true; resolve(false); } }
+          setTimeout(function() { if (!done) { done = true; resolve(false); } }, 1500);
+        });
+      }
+      await audio.remote.prompt();
+      castConnected = audio.remote.state === 'connected';
+      updateCastUI();
+      showStatus(castConnected ? 'Chromecast: подключено' : 'Chromecast: выберите устройство');
+    }
+
+    if (castBtn) {
+      castBtn.addEventListener('click', async function() {
+        try {
+          // Prefer Google Cast Framework when available
+          if (castFrameworkReady || (window.cast && cast.framework)) {
+            if (!castFrameworkReady) initCastFramework();
+            // If we think we're connected but framework has no session, still force disconnect UI
+            if (castConnected) {
+              try {
+                var ctx = cast.framework.CastContext.getInstance();
+                if (ctx.getCurrentSession()) {
+                  ctx.endCurrentSession(true);
+                }
+              } catch (e) {}
+              endCastSession();
+              return;
+            }
+            await castViaFramework();
+            return;
+          }
+          // Fallback: Remote Playback API
+          await castViaRemotePlayback();
+        } catch (err) {
+          console.warn('Cast error', err);
+          var msg = (err && err.message) ? String(err.message) : '';
+          if (err && (err.code === 'cancel' || msg.indexOf('cancel') !== -1)) {
+            showStatus('Chromecast: отменено');
+          } else if (err && err.name === 'NotFoundError') {
+            showStatus('Устройства Chromecast не найдены', 3000);
+          } else if (err && err.name === 'NotSupportedError') {
+            showStatus('Chromecast не поддерживается в этом браузере', 3000);
+          } else if (msg.indexOf('no track') !== -1) {
+            showStatus('Сначала выберите трек для трансляции', 3000);
+          } else {
+            showStatus('Chromecast: ' + (msg || 'ошибка. Откройте сайт по IP в сети (не localhost)'), 4000);
+          }
+          if (!castConnected) updateCastUI();
+        }
+      });
+
+      // Remote Playback events (fallback path)
+      if ('remote' in HTMLMediaElement.prototype && audio.remote) {
+        audio.remote.addEventListener('connecting', function() {
+          showStatus('Chromecast: подключение…');
+        });
+        audio.remote.addEventListener('connect', function() {
+          castConnected = true;
+          updateCastUI();
+          showStatus('Chromecast: подключено');
+        });
+        audio.remote.addEventListener('disconnect', function() {
+          castConnected = false;
+          updateCastUI();
+          showStatus('Chromecast: отключено');
+        });
+      }
+    }
+
+    
 
     themeGrid.addEventListener('click', function(e) {
       const btn = e.target.closest('.theme-card');
@@ -1347,6 +2016,16 @@
       });
       const active = document.querySelector('.track-item.active');
       if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // If Chromecast session is active — send media there instead of local play
+      if (castConnected && castFrameworkReady && castSession) {
+        loadMediaOnCast(autoplay !== false).catch(function(err) {
+          console.warn('Cast track switch failed', err);
+        });
+        savePlaybackState();
+        return;
+      }
+
       if (autoplay) {
         initAudioContext();
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
