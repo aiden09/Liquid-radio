@@ -1,5 +1,8 @@
 # 🎧 Liquid Glass Radio
 Demo - https://pl.darkdna.ru
+<img width="1272" height="2772" alt="48841" src="https://github.com/user-attachments/assets/0b913b73-a7dc-4107-a1d5-721c0c2fc3e7" />
+<img width="1270" height="2366" alt="48844" src="https://github.com/user-attachments/assets/57d3294b-bae4-4382-afcc-fb48942d8b6d" />
+
 
 Красивый интернет-радио плеер на Go в стиле **Liquid Glass**.
 
