@@ -54,7 +54,7 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif;
+      height: 100%; min-height: 100dvh; overflow: hidden; font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
       transition: background 0.6s ease, color 0.4s ease;
     }
@@ -80,19 +80,41 @@
     }
     .bg.pulse-active .bg-pulse-layer { opacity: 1; }
     .app {
-      position: relative; z-index: 1; height: 100%; display: grid;
-      grid-template-columns: 1fr 300px; gap: 16px; padding: 16px;
-      max-width: 1280px; margin: 0 auto;
+      position: relative; z-index: 1; height: 100%; min-height: 100dvh; width: 100%;
+      display: grid;
+      grid-template-columns: 1fr min(340px, 32vw);
+      grid-template-rows: 1fr;
+      gap: 0; padding: 0;
+      max-width: none; margin: 0;
       box-sizing: border-box;
+    }
+    .app > .player {
+      border-radius: 0;
+      height: 100%;
+      min-height: 100%;
+      align-self: stretch;
+    }
+    .app > .playlist {
+      border-radius: 0;
+      height: 100%;
+      min-height: 100%;
+      align-self: stretch;
     }
     @media (max-width: 900px) {
       .app {
         grid-template-columns: 1fr;
         grid-template-rows: minmax(0, 1fr) auto;
-        padding: 10px; gap: 10px; height: 100dvh;
+        padding: 0; gap: 0; height: 100dvh;
       }
+      .app > .player { border-radius: 0; }
       .player { padding: 12px 12px 10px; overflow: hidden; }
-      .playlist { max-height: 30vh; min-height: 100px; }
+      .playlist {
+        max-height: none;
+        min-height: 120px;
+        height: var(--playlist-h, 32vh);
+        border-radius: 22px 22px 0 0;
+        position: relative;
+      }
       .cover-wrap { width: min(130px, 36vw, 22vh) !important; margin-top: 2px; margin-bottom: 4px; }
       .cover { width: min(130px, 36vw, 22vh) !important; height: min(130px, 36vw, 22vh) !important; border-radius: 18px !important; }
       .eq { height: 28px; margin-top: 6px; }
@@ -126,12 +148,11 @@
       -webkit-backdrop-filter: blur(40px) saturate(180%);
       border: 1px solid var(--glass-border); border-radius: var(--radius);
       box-shadow: var(--shadow), inset 0 1px 0 0 var(--glass-highlight);
-      transition: background 0.5s, border-color 0.5s, box-shadow 0.5s;
     }
     .player {
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       padding: 18px 24px 16px; position: relative; overflow: hidden;
-      min-height: 0; height: 100%;
+      min-height: 100%; height: 100%;
       gap: 0;
     }
     .player::before {
@@ -141,14 +162,14 @@
     }
     .cover-wrap {
       position: relative;
-      width: min(168px, 38vw, 28vh);
+      width: min(320px, 42vw, 46vh);
       margin-top: 4px;
       margin-bottom: 6px;
       display: flex; flex-direction: column; align-items: center;
       flex-shrink: 0;
     }
     .cover {
-      width: min(168px, 38vw, 28vh); height: min(168px, 38vw, 28vh);
+      width: min(320px, 42vw, 46vh); height: min(320px, 42vw, 46vh);
       border-radius: 22px;
       background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent2) 30%, transparent));
       border: 1px solid var(--glass-border);
@@ -284,7 +305,14 @@
     }
     .volume-bar::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--accent3); border: none; cursor: pointer; }
     .playlist { display: flex; flex-direction: column; padding: 24px 0; overflow: hidden; }
-    .playlist-header { padding: 0 24px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .playlist-handle {
+      display: none;
+      width: 44px; height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.28);
+      margin: 8px auto 4px;
+      flex-shrink: 0;
+    }
+    .playlist-header { padding: 0 24px 16px; display: flex; align-items: center; justify-content: space-between; touch-action: none; }
     .playlist-header h2 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; }
     .track-count { font-size: 0.78rem; color: var(--text-dim); background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 20px; }
     .track-list { list-style: none; overflow-y: auto; flex: 1; padding: 0 12px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
@@ -353,24 +381,17 @@
     /* Settings panel */
     .settings-overlay {
       position: fixed; inset: 0; z-index: 100;
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
-      display: none; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.25s ease;
+      background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      visibility: hidden; opacity: 0; pointer-events: none;
     }
-    .settings-overlay.open { display: flex; opacity: 1; }
+    .settings-overlay.open { visibility: visible; opacity: 1; pointer-events: auto; }
     .settings-panel {
       width: min(360px, 92vw); max-height: 85vh; overflow-y: auto;
       padding: 24px; border-radius: 24px;
-      background: var(--glass);
-      backdrop-filter: blur(40px) saturate(180%);
-      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      background: rgba(18, 16, 28, 0.92);
       border: 1px solid var(--glass-border);
       box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 0 var(--glass-highlight);
-      animation: panelIn 0.28s ease;
-    }
-    @keyframes panelIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .settings-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -452,19 +473,27 @@
     /* Playlist collapse */
     .app.playlist-collapsed {
       grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
     }
     .app.playlist-collapsed .playlist {
-      display: none;
+      display: none !important;
+    }
+    .app.playlist-collapsed > .player {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
     }
     /* Larger UI when playlist is collapsed */
     .app.playlist-collapsed .cover-wrap {
-      width: min(240px, 48vw, 36vh);
+      width: min(380px, 52vw, 52vh);
       margin-top: 8px;
       margin-bottom: 10px;
     }
     .app.playlist-collapsed .cover {
-      width: min(240px, 48vw, 36vh);
-      height: min(240px, 48vw, 36vh);
+      width: min(380px, 52vw, 52vh);
+      height: min(380px, 52vw, 52vh);
       border-radius: 28px;
     }
     .app.playlist-collapsed .eq {
@@ -542,6 +571,8 @@
     .show-playlist-btn.visible { display: flex; }
     .show-playlist-btn svg { width: 18px; height: 18px; fill: currentColor; }
     @media (max-width: 900px) {
+      .playlist-handle { display: block; }
+      .playlist-header { padding-top: 2px; cursor: ns-resize; }
       .app.playlist-collapsed { grid-template-rows: 1fr; }
       .app.playlist-collapsed .playlist { display: none; }
       .app.playlist-collapsed .cover-wrap {
@@ -596,20 +627,17 @@
     /* Audio EQ panel */
     .eq-overlay {
       position: fixed; inset: 0; z-index: 100;
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
-      display: none; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.25s ease;
+      background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      visibility: hidden; opacity: 0; pointer-events: none;
     }
-    .eq-overlay.open { display: flex; opacity: 1; }
+    .eq-overlay.open { visibility: visible; opacity: 1; pointer-events: auto; }
     .eq-panel {
       width: min(380px, 94vw); max-height: 88vh; overflow-y: auto;
       padding: 24px; border-radius: 24px;
-      background: var(--glass);
-      backdrop-filter: blur(40px) saturate(180%);
-      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      background: rgba(18, 16, 28, 0.92);
       border: 1px solid var(--glass-border);
       box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 0 var(--glass-highlight);
-      animation: panelIn 0.28s ease;
     }
     .eq-presets {
       display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
@@ -692,7 +720,7 @@
       background: color-mix(in srgb, var(--accent) 35%, transparent);
     }
 
-  </style>
+    </style>
 </head>
 <body>
   <div class="bg">
@@ -759,8 +787,9 @@
         <input type="range" class="volume-bar" id="volume" min="0" max="1" step="0.01" value="0.85" />
       </div>
     </div>
-    <div class="playlist glass">
-      <div class="playlist-header">
+    <div class="playlist glass" id="playlistPanel">
+      <div class="playlist-handle" id="playlistHandle" aria-hidden="true"></div>
+      <div class="playlist-header" id="playlistHeader">
         <h2>Каталог</h2>
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="track-count" id="trackCount">0</span>
@@ -1734,34 +1763,57 @@
       }
     }, 1500);
 
+    function isCastCancel(err) {
+      if (!err) return false;
+      var code = String(err.code || err.errorCode || '').toLowerCase();
+      var msg = String(err.message || err.description || err || '').toLowerCase();
+      return code === 'cancel' ||
+        msg.indexOf('cancel') !== -1 ||
+        msg.indexOf('dismiss') !== -1 ||
+        msg.indexOf('отмен') !== -1;
+    }
+
+    var castBusy = false;
     async function castViaFramework() {
-      var context = cast.framework.CastContext.getInstance();
-      var session = context.getCurrentSession();
+      if (castBusy) return;
+      castBusy = true;
+      try {
+        if (!castFrameworkReady) initCastFramework();
+        var context = cast.framework.CastContext.getInstance();
+        var session = context.getCurrentSession();
 
-      // Already casting → disconnect on button click
-      if (castConnected || session) {
-        try {
-          context.endCurrentSession(true);
-        } catch (e) {
-          console.warn('endCurrentSession', e);
+        if (castConnected || session) {
+          try { context.endCurrentSession(true); } catch (e) {}
+          try {
+            if (castSession && typeof castSession.stop === 'function') {
+              castSession.stop(function() {}, function() {});
+            }
+          } catch (e2) {}
+          endCastSession();
+          return;
         }
-        try {
-          if (castSession && typeof castSession.stop === 'function') {
-            castSession.stop(function() {}, function() {});
-          }
-        } catch (e2) {}
-        endCastSession();
-        return;
-      }
 
-      showStatus('Chromecast: выбор устройства…');
-      await context.requestSession();
-      var s = context.getCurrentSession();
-      if (s) {
-        castSession = s.getSessionObj();
-        castConnected = true;
-        updateCastUI();
-        await loadMediaOnCast(true);
+        showStatus('Chromecast: выбор устройства…');
+        try {
+          await context.requestSession();
+        } catch (err) {
+          if (isCastCancel(err)) {
+            showStatus('Chromecast: выбор отменён');
+            return;
+          }
+          throw err;
+        }
+        var s = context.getCurrentSession();
+        if (s) {
+          castSession = s.getSessionObj();
+          castConnected = true;
+          updateCastUI();
+          await loadMediaOnCast(true);
+        } else {
+          showStatus('Chromecast: устройство не выбрано');
+        }
+      } finally {
+        castBusy = false;
       }
     }
 
@@ -1829,9 +1881,9 @@
           await castViaRemotePlayback();
         } catch (err) {
           console.warn('Cast error', err);
-          var msg = (err && err.message) ? String(err.message) : '';
-          if (err && (err.code === 'cancel' || msg.indexOf('cancel') !== -1)) {
-            showStatus('Chromecast: отменено');
+          var msg = String((err && (err.message || err.description)) || '');
+          if (isCastCancel(err)) {
+            showStatus('Chromecast: выбор отменён');
           } else if (err && err.name === 'NotFoundError') {
             showStatus('Устройства Chromecast не найдены', 3000);
           } else if (err && err.name === 'NotSupportedError') {
@@ -1839,7 +1891,7 @@
           } else if (msg.indexOf('no track') !== -1) {
             showStatus('Сначала выберите трек для трансляции', 3000);
           } else {
-            showStatus('Chromecast: ' + (msg || 'ошибка. Откройте сайт по IP в сети (не localhost)'), 4000);
+            showStatus('Chromecast: не удалось подключиться. Откройте сайт по IP в сети (не localhost)', 4000);
           }
           if (!castConnected) updateCastUI();
         }
@@ -2005,6 +2057,7 @@
     function loadTrack(index, autoplay) {
       if (typeof autoplay === 'undefined') autoplay = true;
       if (index < 0 || index >= tracks.length) return;
+
       currentIndex = index;
       const t = tracks[index];
       audio.src = t.url;
@@ -2123,26 +2176,199 @@
 
     
     // Playlist collapse
+    const playlistPanel = document.getElementById('playlistPanel') || document.querySelector('.playlist');
+    var playlistHistoryPushed = false;
+    var collapsingFromPopstate = false;
+
+    function isPlaylistOpen() {
+      return appEl && !appEl.classList.contains('playlist-collapsed');
+    }
+
     function setPlaylistCollapsed(collapsed) {
+      var wasCollapsed = appEl.classList.contains('playlist-collapsed');
       appEl.classList.toggle('playlist-collapsed', collapsed);
       showPlaylistBtn.classList.toggle('visible', collapsed);
       localStorage.setItem('lgr-playlist-collapsed', collapsed ? '1' : '0');
+
+      if (!collapsed && wasCollapsed) {
+        if (!playlistHistoryPushed) {
+          try { history.pushState({ lgrPlaylist: 1 }, ''); } catch (e) {}
+          playlistHistoryPushed = true;
+        }
+      } else if (collapsed && !wasCollapsed) {
+        if (playlistHistoryPushed && !collapsingFromPopstate) {
+          playlistHistoryPushed = false;
+          try { history.back(); } catch (e) {}
+        } else {
+          playlistHistoryPushed = false;
+        }
+      }
+    }
+    function collapsePlaylistIfOpen() {
+      if (!isPlaylistOpen()) return false;
+      if (settingsOverlay && settingsOverlay.classList.contains('open')) return false;
+      if (eqOverlay && eqOverlay.classList.contains('open')) return false;
+      setPlaylistCollapsed(true);
+      showStatus('Плейлист свёрнут');
+      return true;
     }
     function initPlaylistCollapse() {
       setPlaylistCollapsed(localStorage.getItem('lgr-playlist-collapsed') === '1');
     }
     if (playlistToggle) {
-      playlistToggle.addEventListener('click', function() {
+      playlistToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
         setPlaylistCollapsed(true);
         showStatus('Плейлист свёрнут');
       });
     }
     if (showPlaylistBtn) {
-      showPlaylistBtn.addEventListener('click', function() {
+      showPlaylistBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
         setPlaylistCollapsed(false);
         showStatus('Плейлист открыт');
       });
     }
+
+    // Click / tap outside playlist → collapse
+    document.addEventListener('pointerdown', function(e) {
+      if (!isPlaylistOpen()) return;
+      if (e.pointerType === 'touch') return; // handled by swipe + click
+      if (e.button != null && e.button !== 0) return;
+      var t = e.target;
+      if (t.closest && (
+        t.closest('#playlistPanel') ||
+        t.closest('.playlist') ||
+        t.closest('#showPlaylistBtn') ||
+        t.closest('#settingsOverlay') ||
+        t.closest('#eqOverlay') ||
+        t.closest('#castBtn') ||
+        t.closest('#status')
+      )) return;
+      collapsePlaylistIfOpen();
+    });
+    document.addEventListener('click', function(e) {
+      if (!isPlaylistOpen()) return;
+      var t = e.target;
+      if (t.closest && (
+        t.closest('#playlistPanel') ||
+        t.closest('.playlist') ||
+        t.closest('#showPlaylistBtn') ||
+        t.closest('#settingsOverlay') ||
+        t.closest('#eqOverlay') ||
+        t.closest('#castBtn') ||
+        t.closest('#status')
+      )) return;
+      collapsePlaylistIfOpen();
+    });
+
+    // Swipe back (edge only) — do not collapse on playlist scroll
+    var swipeStartX = 0, swipeStartY = 0, swipeTracking = false, swipeFromEdge = false;
+    document.addEventListener('touchstart', function(e) {
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      if (!isPlaylistOpen()) return;
+      if (e.target.closest && e.target.closest('.track-list')) return;
+      var tch = e.changedTouches[0];
+      swipeStartX = tch.clientX;
+      swipeStartY = tch.clientY;
+      swipeFromEdge = swipeStartX <= 28;
+      swipeTracking = swipeFromEdge;
+    }, { passive: true });
+    document.addEventListener('touchend', function(e) {
+      if (!swipeTracking) return;
+      swipeTracking = false;
+      if (!isPlaylistOpen()) return;
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      var tch = e.changedTouches[0];
+      var dx = tch.clientX - swipeStartX;
+      var dy = tch.clientY - swipeStartY;
+      if (swipeFromEdge && dx > 70 && Math.abs(dx) > Math.abs(dy) * 1.1) {
+        collapsePlaylistIfOpen();
+      }
+    }, { passive: true });
+
+    window.addEventListener('popstate', function() {
+      if (isPlaylistOpen()) {
+        collapsingFromPopstate = true;
+        playlistHistoryPushed = false;
+        setPlaylistCollapsed(true);
+        showStatus('Плейлист свёрнут');
+        collapsingFromPopstate = false;
+      } else {
+        playlistHistoryPushed = false;
+      }
+    });
+
+    // Mobile: drag playlist height upward
+    function isMobileLayout() {
+      return window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+    }
+    function applyPlaylistHeight(px) {
+      var vh = window.innerHeight || 1;
+      var minH = Math.max(120, vh * 0.22);
+      var maxH = vh * 0.86;
+      var h = Math.max(minH, Math.min(maxH, px));
+      document.documentElement.style.setProperty('--playlist-h', h + 'px');
+      return h;
+    }
+    function snapPlaylistHeight(px) {
+      var vh = window.innerHeight || 1;
+      if (px < vh * 0.18) {
+        collapsePlaylistIfOpen();
+        return;
+      }
+      var points = [vh * 0.28, vh * 0.5, vh * 0.78];
+      var best = points[0], bestD = Math.abs(px - points[0]);
+      for (var i = 1; i < points.length; i++) {
+        var d = Math.abs(px - points[i]);
+        if (d < bestD) { bestD = d; best = points[i]; }
+      }
+      applyPlaylistHeight(best);
+      try { localStorage.setItem('lgr-playlist-h', String(Math.round(best))); } catch (e) {}
+    }
+    (function initPlaylistHeight() {
+      var saved = parseInt(localStorage.getItem('lgr-playlist-h') || '0', 10);
+      if (saved > 80) applyPlaylistHeight(saved);
+    })();
+
+    var dragPl = false, dragStartY = 0, dragStartH = 0;
+    function playlistDragTarget(el) {
+      if (!el || !el.closest) return false;
+      if (el.closest('#playlistToggle')) return false;
+      return !!(el.closest('#playlistHandle') || el.closest('#playlistHeader'));
+    }
+    function onPlPointerDown(e) {
+      if (!isMobileLayout() || !isPlaylistOpen()) return;
+      if (!playlistDragTarget(e.target)) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      dragPl = true;
+      dragStartY = e.clientY;
+      dragStartH = playlistPanel ? playlistPanel.getBoundingClientRect().height : 0;
+      if (e.currentTarget && e.currentTarget.setPointerCapture) {
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      e.preventDefault();
+    }
+    function onPlPointerMove(e) {
+      if (!dragPl) return;
+      var next = dragStartH + (dragStartY - e.clientY);
+      applyPlaylistHeight(next);
+    }
+    function onPlPointerUp(e) {
+      if (!dragPl) return;
+      dragPl = false;
+      var h = playlistPanel ? playlistPanel.getBoundingClientRect().height : 0;
+      snapPlaylistHeight(h);
+    }
+    var headerEl = document.getElementById('playlistHeader');
+    var handleEl = document.getElementById('playlistHandle');
+    [headerEl, handleEl].forEach(function(el) {
+      if (!el) return;
+      el.addEventListener('pointerdown', onPlPointerDown);
+      el.addEventListener('pointermove', onPlPointerMove);
+      el.addEventListener('pointerup', onPlPointerUp);
+      el.addEventListener('pointercancel', onPlPointerUp);
+    });
 
 
     function tracksFingerprint(list) {
